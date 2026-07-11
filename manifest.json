@@ -1,0 +1,17 @@
+{
+  "name": "Cortex — entraînement cérébral",
+  "short_name": "Cortex",
+  "description": "5 minutes qui te rendent plus affûté, au lieu de 20 qui te vident.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

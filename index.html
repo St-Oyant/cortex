@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d0d0d">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Cortex — ton entraînement cérébral</title>
+<style>
+  :root{
+    --page:#0d0d0d; --surface:#1a1a19; --surface2:#232322;
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --hairline:rgba(255,255,255,0.10); --grid:#2c2c2a;
+    --d0:#3987e5; /* Culture G — bleu */
+    --d1:#199e70; /* Logique — aqua */
+    --d2:#9085e9; /* PLM — violet */
+    --d3:#c98500; /* Esprit critique — jaune */
+    --good:#0ca30c; --bad:#d03b3b;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    background:var(--page); color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    display:flex; justify-content:center;
+    overscroll-behavior:none;
+  }
+  #app{width:100%; max-width:480px; min-height:100dvh; display:flex; flex-direction:column; padding:20px 18px 32px;}
+  .screen{display:none; flex-direction:column; flex:1; animation:fadein .25s ease;}
+  .screen.active{display:flex;}
+  @keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+  @keyframes pop{0%{transform:scale(.92);} 60%{transform:scale(1.04);} 100%{transform:scale(1);}}
+
+  h1{font-size:28px; letter-spacing:-0.5px;}
+  .sub{color:var(--ink2); font-size:15px; line-height:1.45; margin-top:6px;}
+  .brand{display:flex; align-items:baseline; gap:8px;}
+  .brand .logo{font-size:26px;}
+
+  .topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;}
+  .pill{background:var(--surface); border:1px solid var(--hairline); border-radius:999px; padding:6px 12px; font-size:14px; color:var(--ink2); display:inline-flex; align-items:center; gap:6px;}
+  .pill b{color:var(--ink); font-weight:600;}
+
+  .card{background:var(--surface); border:1px solid var(--hairline); border-radius:var(--radius); padding:18px; margin-bottom:14px;}
+  .card h3{font-size:13px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; margin-bottom:12px;}
+
+  .xpbar{height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; margin-top:10px;}
+  .xpbar > div{height:100%; background:var(--d0); border-radius:4px; transition:width .5s ease;}
+  .xprow{display:flex; justify-content:space-between; align-items:baseline;}
+  .xprow .lvl{font-size:20px; font-weight:700;}
+  .xprow .xpnum{font-size:13px; color:var(--muted);}
+
+  .domrow{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .domrow:last-child{margin-bottom:0;}
+  .domdot{width:10px; height:10px; border-radius:3px; flex:none;}
+  .domname{font-size:14px; flex:1; color:var(--ink2);}
+  .dombar{flex:1.4; height:6px; background:var(--surface2); border-radius:3px; overflow:hidden;}
+  .dombar > div{height:100%; border-radius:3px; transition:width .5s ease;}
+  .domlvl{font-size:12px; color:var(--muted); width:52px; text-align:right;}
+
+  button{font-family:inherit; border:none; cursor:pointer;}
+  .btn{
+    width:100%; padding:16px; border-radius:var(--radius);
+    font-size:17px; font-weight:600; color:#fff;
+    background:linear-gradient(135deg,#2a78d6,#4a3aa7);
+    margin-top:auto; box-shadow:0 4px 18px rgba(42,120,214,.25);
+  }
+  .btn:active{transform:scale(.98);}
+  .btn.secondary{background:var(--surface); border:1px solid var(--hairline); box-shadow:none; color:var(--ink2); font-weight:500; margin-top:10px;}
+  .btn.small{padding:12px; font-size:15px;}
+
+  /* quiz */
+  .qhead{display:flex; align-items:center; gap:10px; margin-bottom:16px;}
+  .qdots{display:flex; gap:6px; flex:1;}
+  .qdot{height:5px; flex:1; border-radius:3px; background:var(--surface2);}
+  .qdot.done{background:var(--good);}
+  .qdot.wrong{background:var(--bad);}
+  .qdot.cur{background:var(--ink2);}
+  .quit{background:none; color:var(--muted); font-size:22px; line-height:1; padding:4px 8px;}
+  .qtag{display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px; margin-bottom:14px;}
+  .qtext{font-size:19px; line-height:1.42; font-weight:600; margin-bottom:20px; white-space:pre-line;}
+  .choice{
+    width:100%; text-align:left; padding:14px 16px; margin-bottom:10px;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:14px;
+    color:var(--ink); font-size:16px; line-height:1.35; transition:border-color .15s;
+  }
+  .choice:active{border-color:var(--muted);}
+  .choice.correct{border-color:var(--good); background:rgba(12,163,12,.10);}
+  .choice.wrong{border-color:var(--bad); background:rgba(208,59,59,.10);}
+  .choice.dim{opacity:.45;}
+  .choice:disabled{cursor:default;}
+  .explain{
+    background:var(--surface2); border-radius:14px; padding:14px 16px;
+    font-size:14.5px; line-height:1.5; color:var(--ink2); margin-top:4px;
+    animation:fadein .3s ease;
+  }
+  .explain b{color:var(--ink);}
+  .verdict{font-size:16px; font-weight:700; margin-bottom:6px;}
+  .verdict.ok{color:var(--good);} .verdict.ko{color:var(--bad);}
+  .combo{font-size:13px; color:var(--d3); font-weight:600; margin-top:6px;}
+
+  /* résultats */
+  .bigscore{font-size:52px; font-weight:800; letter-spacing:-1px; animation:pop .45s ease;}
+  .center{text-align:center;}
+  .gain{font-size:16px; color:var(--d0); font-weight:700; margin-top:4px;}
+  .streakflame{font-size:15px; color:var(--ink2); margin-top:10px;}
+
+  .savecode{
+    background:var(--surface2); border-radius:12px; padding:12px;
+    font-family:ui-monospace,Menlo,monospace; font-size:12px;
+    word-break:break-all; color:var(--ink2); margin-top:10px; line-height:1.5;
+  }
+  .copybtn{margin-top:10px; width:100%; padding:11px; border-radius:10px; background:var(--surface); border:1px solid var(--hairline); color:var(--ink); font-size:14px; font-weight:600;}
+  .note{font-size:12.5px; color:var(--muted); line-height:1.5; margin-top:10px;}
+
+  textarea{
+    width:100%; background:var(--surface2); border:1px solid var(--hairline);
+    border-radius:12px; color:var(--ink); padding:12px;
+    font-family:ui-monospace,Menlo,monospace; font-size:13px; min-height:84px; resize:none;
+  }
+  textarea:focus{outline:none; border-color:var(--d0);}
+  .err{color:var(--bad); font-size:13px; margin-top:8px; display:none;}
+
+  .footerlinks{display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; margin-top:16px;}
+  .footerlinks button{background:none; color:var(--muted); font-size:13px; text-decoration:underline; text-underline-offset:3px;}
+
+  /* bilan résultat : barres par domaine */
+  .bilanbars .domrow{margin-bottom:14px;}
+  .medal{font-size:44px; margin-bottom:8px; animation:pop .5s ease;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ACCUEIL -->
+  <section class="screen" id="scr-home">
+    <div class="topbar">
+      <div class="brand"><span class="logo">🧠</span><h1>Cortex</h1></div>
+      <div class="pill" id="streakpill">🔥 <b id="streakval">0</b></div>
+    </div>
+
+    <div class="card">
+      <div class="xprow"><span class="lvl" id="rankname">Curieux</span><span class="xpnum" id="xpnum">0 XP</span></div>
+      <div class="xpbar"><div id="xpfill" style="width:0%"></div></div>
+      <div class="note" id="xpnext"></div>
+    </div>
+
+    <div class="card">
+      <h3>Tes domaines</h3>
+      <div id="domlist"></div>
+    </div>
+
+    <div class="card" id="dailycard">
+      <h3>Aujourd'hui</h3>
+      <div class="sub" id="dailymsg"></div>
+    </div>
+
+    <button class="btn" id="btn-start">⚡ Session éclair · 5 questions</button>
+    <div class="footerlinks">
+      <button id="btn-save">Sauvegarder</button>
+      <button id="btn-load">Reprendre un code</button>
+      <button id="btn-rebilan">Refaire le bilan</button>
+      <button id="btn-update">Mise à niveau</button>
+    </div>
+  </section>
+
+  <!-- MISE À NIVEAU -->
+  <section class="screen" id="scr-update">
+    <h1>Mise à niveau</h1>
+    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v1.2</b> · 116 questions</p>
+    <div class="card" style="margin-top:18px;">
+      <h3>Comment recharger l'app</h3>
+      <p class="sub">1️⃣ Copie ton code de progression ci-dessous.<br><br>2️⃣ Envoie-le à Claude avec « <b>Recharge Cortex</b> » : tu recevras un nouvel <b>index.html</b> avec du contenu frais.<br><br>3️⃣ Téléverse-le sur ton dépôt GitHub (Add file → Upload files : il remplace l'ancien). Quelques minutes plus tard, l'app installée se met à jour toute seule — ta progression, elle, reste dans le téléphone.</p>
+    </div>
+    <div class="card">
+      <h3>📤 Ton code de progression</h3>
+      <div class="savecode" id="upd-code"></div>
+      <button class="copybtn" id="btn-copy3">Copier le code</button>
+    </div>
+    <button class="btn secondary small" style="margin-top:auto;" id="btn-updback">Retour</button>
+  </section>
+
+  <!-- PREMIER LANCEMENT -->
+  <section class="screen" id="scr-welcome">
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+      <div class="center" style="font-size:56px; margin-bottom:14px;">🧠</div>
+      <h1 class="center">Cortex</h1>
+      <p class="sub center" style="margin-top:12px;">5 minutes qui te rendent plus affûté,<br>au lieu de 20 qui te vident.</p>
+      <div class="card" style="margin-top:26px;">
+        <h3>Comment ça marche</h3>
+        <p class="sub">🎯 Un <b>bilan initial</b> de 12 questions pour situer ton niveau.<br><br>⚡ Ensuite, des <b>sessions éclair</b> de 5 questions : culture générale, logique, PLM &amp; consulting, esprit critique.<br><br>📈 La difficulté s'adapte à toi. Chaque jour joué allonge ta série 🔥.</p>
+      </div>
+    </div>
+    <button class="btn" id="btn-bilan">🎯 Commencer le bilan initial</button>
+    <button class="btn secondary small" id="btn-load2">J'ai déjà un code de sauvegarde</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen" id="scr-quiz">
+    <div class="qhead">
+      <div class="qdots" id="qdots"></div>
+      <button class="quit" id="btn-quit">×</button>
+    </div>
+    <div id="qtagwrap"></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="choices"></div>
+    <div id="explainwrap"></div>
+    <button class="btn small" id="btn-next" style="display:none; margin-top:14px;">Continuer →</button>
+  </section>
+
+  <!-- RÉSULTAT SESSION -->
+  <section class="screen" id="scr-result">
+    <div style="flex:1; display:flex; flex-direction:column; justify-content:center;" class="center">
+      <div class="medal" id="res-emoji">🏆</div>
+      <div class="bigscore" id="res-score">4/5</div>
+      <div class="gain" id="res-xp">+120 XP</div>
+      <div class="streakflame" id="res-streak"></div>
+      <div class="card" style="text-align:left; margin-top:22px;" id="res-levelups" hidden></div>
+      <div class="card" style="text-align:left; margin-top:22px;">
+        <h3 id="res-savetitle">💾 Ton code de sauvegarde</h3>
+        <div class="savecode" id="res-code"></div>
+        <button class="copybtn" id="btn-copy">Copier le code</button>
+        <p class="note" id="res-savenote">Colle-le dans « Reprendre un code » à ta prochaine visite pour garder ta progression.</p>
+      </div>
+    </div>
+    <button class="btn" id="btn-again">⚡ Encore une session</button>
+    <button class="btn secondary small" id="btn-home">Retour à l'accueil</button>
+  </section>
+
+  <!-- RÉSULTAT BILAN -->
+  <section class="screen" id="scr-bilan">
+    <div style="flex:1;">
+      <h1>Ton profil de départ</h1>
+      <p class="sub">Voilà ta photo cognitive du jour. C'est ta ligne de base — on la refera dans quelques semaines pour mesurer le chemin parcouru.</p>
+      <div class="card bilanbars" style="margin-top:20px;">
+        <h3>Résultats par domaine</h3>
+        <div id="bilanbars"></div>
+      </div>
+      <div class="card">
+        <h3>Lecture</h3>
+        <p class="sub" id="bilantext"></p>
+      </div>
+    </div>
+    <button class="btn" id="btn-bilan-done">C'est parti →</button>
+  </section>
+
+  <!-- CHARGER UN CODE -->
+  <section class="screen" id="scr-load">
+    <h1>Reprendre un code</h1>
+    <p class="sub" style="margin-bottom:16px;">Colle ici ton code de sauvegarde :</p>
+    <textarea id="loadinput" placeholder="CTX1-…"></textarea>
+    <div class="err" id="loaderr">Ce code n'est pas valide — vérifie qu'il est complet.</div>
+    <button class="btn small" style="margin-top:16px;" id="btn-loadgo">Charger ma progression</button>
+    <button class="btn secondary small" id="btn-loadback">Annuler</button>
+  </section>
+
+  <!-- SAUVEGARDE MANUELLE -->
+  <section class="screen" id="scr-save">
+    <h1>Sauvegarder</h1>
+    <p class="sub" style="margin-bottom:6px;">Ton code de progression actuel :</p>
+    <div class="savecode" id="save-code"></div>
+    <button class="copybtn" id="btn-copy2">Copier le code</button>
+    <p class="note" id="save-note">Garde-le dans tes notes : ce code est ta mémoire de secours.</p>
+    <button class="btn secondary small" style="margin-top:auto;" id="btn-saveback">Retour</button>
+  </section>
+
+</div>
+<script>
+/* ============ DONNÉES ============ */
+const DOMAINS = [
+  {name:"Culture générale", short:"Culture G", color:"#3987e5", emoji:"🌍"},
+  {name:"Logique & déduction", short:"Logique", color:"#199e70", emoji:"🧩"},
+  {name:"PLM & consulting", short:"PLM", color:"#9085e9", emoji:"⚙️"},
+  {name:"Esprit critique", short:"Critique", color:"#c98500", emoji:"🔍"},
+];
+const RANKS = [
+  [0,"Curieux"],[150,"Apprenti"],[400,"Éclairé"],[800,"Analyste"],
+  [1400,"Stratège"],[2200,"Érudit"],[3200,"Polymathe"],[4500,"Maître Cortex"]
+];
+/* Chaque question : d=domaine 0-3, l=difficulté 1-3, q, c=choix, a=index bonne réponse, e=explication */
+const BANK = [
+/* ===== CULTURE GÉNÉRALE (d:0) ===== */
+{d:0,l:1,bi:1,q:"Quelle est la capitale de l'Australie ?",c:["Sydney","Canberra","Melbourne","Perth"],a:1,e:"Piège classique : Sydney est la plus grande ville, mais <b>Canberra</b> fut construite exprès comme capitale en 1913, pour départager Sydney et Melbourne."},
+{d:0,l:1,q:"Qui a peint La Joconde ?",c:["Michel-Ange","Raphaël","Léonard de Vinci","Botticelli"],a:2,e:"<b>Léonard de Vinci</b>, vers 1503-1506. Le tableau est arrivé en France avec lui, invité par François Iᵉʳ — d'où sa présence au Louvre."},
+{d:0,l:1,q:"Quel est le plus long fleuve entièrement en France ?",c:["La Seine","Le Rhône","La Garonne","La Loire"],a:3,e:"<b>La Loire</b> : 1 006 km, le seul fleuve français à dépasser les 1 000 km. Le Rhône est plus puissant mais naît en Suisse."},
+{d:0,l:1,q:"En quelle année le mur de Berlin est-il tombé ?",c:["1987","1989","1991","1993"],a:1,e:"Le <b>9 novembre 1989</b>. La réunification allemande suivra moins d'un an après, le 3 octobre 1990."},
+{d:0,l:1,q:"Quelle est la planète la plus proche du Soleil ?",c:["Vénus","Mars","Mercure","La Terre"],a:2,e:"<b>Mercure</b>, à environ 58 millions de km. Paradoxe amusant : ce n'est pas la plus chaude — c'est Vénus, à cause de son effet de serre massif."},
+{d:0,l:1,q:"Qui a écrit « Les Misérables » ?",c:["Émile Zola","Victor Hugo","Honoré de Balzac","Gustave Flaubert"],a:1,e:"<b>Victor Hugo</b>, publié en 1862 pendant son exil à Guernesey. Zola, lui, c'est « Germinal » et les Rougon-Macquart."},
+{d:0,l:1,q:"Quel est le plus grand océan du monde ?",c:["L'Atlantique","L'Indien","L'Arctique","Le Pacifique"],a:3,e:"Le <b>Pacifique</b> couvre environ un tiers de la surface du globe — plus que toutes les terres émergées réunies."},
+{d:0,l:1,q:"Quel est le symbole chimique de l'or ?",c:["Or","Go","Au","Ag"],a:2,e:"<b>Au</b>, du latin <i>aurum</i>. Ag, c'est l'argent (<i>argentum</i>) — qui a d'ailleurs donné son nom à l'Argentine."},
+{d:0,l:1,q:"Quel pays a offert la statue de la Liberté aux États-Unis ?",c:["Le Royaume-Uni","La France","L'Espagne","L'Italie"],a:1,e:"<b>La France</b>, en 1886, pour le centenaire de l'indépendance américaine. Sculptée par Bartholdi, avec une ossature signée… Gustave Eiffel."},
+{d:0,l:1,q:"En quelle année a débuté la Révolution française ?",c:["1789","1792","1776","1804"],a:0,e:"<b>1789</b> : prise de la Bastille le 14 juillet. 1776 c'est l'indépendance américaine, 1804 le sacre de Napoléon."},
+{d:0,l:1,q:"Quel organe du corps humain produit l'insuline ?",c:["Le foie","Les reins","Le pancréas","La rate"],a:2,e:"Le <b>pancréas</b>, via les îlots de Langerhans. Un déficit d'insuline ou une résistance à celle-ci provoque le diabète."},
+{d:0,l:1,q:"Quel est le plus haut sommet d'Afrique ?",c:["Le mont Kenya","Le Kilimandjaro","L'Atlas","Le Ras Dashan"],a:1,e:"Le <b>Kilimandjaro</b> (5 895 m), en Tanzanie. Un volcan endormi dont les neiges éternelles fondent d'année en année."},
+{d:0,l:1,q:"Qui a écrit « Le Petit Prince » ?",c:["Antoine de Saint-Exupéry","Albert Camus","Jules Verne","Marcel Pagnol"],a:0,e:"<b>Saint-Exupéry</b>, publié en 1943 à New York. C'est l'un des livres les plus traduits au monde, avec plus de 500 langues et dialectes."},
+{d:0,l:1,q:"Quel gaz la photosynthèse rejette-t-elle ?",c:["Du dioxyde de carbone","Du dioxygène","De l'azote","Du méthane"],a:1,e:"Les plantes absorbent du CO₂ et rejettent du <b>dioxygène</b> (O₂). L'essentiel de l'oxygène terrestre vient d'ailleurs du phytoplancton océanique."},
+{d:0,l:1,q:"Quelle est la monnaie du Japon ?",c:["Le won","Le yuan","Le yen","Le ringgit"],a:2,e:"Le <b>yen</b>. Le won est coréen, le yuan chinois. Les trois mots viennent du même caractère signifiant « rond »."},
+{d:0,l:1,q:"Combien y a-t-il de joueurs dans une équipe de football sur le terrain ?",c:["10","11","12","9"],a:1,e:"<b>11</b>, gardien compris. Le rugby à XV en compte 15, le handball 7, le volley 6."},
+{d:0,l:2,q:"Quel traité de 1957 a fondé la Communauté économique européenne ?",c:["Le traité de Maastricht","Le traité de Rome","Le traité de Lisbonne","Le traité de Paris"],a:1,e:"Le <b>traité de Rome</b> (1957), signé par six pays. Maastricht (1992) créera l'Union européenne et préparera l'euro."},
+{d:0,l:2,q:"Qui a peint « La Nuit étoilée » ?",c:["Claude Monet","Paul Gauguin","Vincent van Gogh","Edvard Munch"],a:2,e:"<b>Van Gogh</b>, en 1889, depuis l'asile de Saint-Rémy-de-Provence. Il n'a vendu qu'une poignée de toiles de son vivant."},
+{d:0,l:2,q:"Quelle est approximativement la vitesse de la lumière dans le vide ?",c:["300 000 km/s","150 000 km/s","1 million km/s","30 000 km/s"],a:0,e:"<b>~300 000 km/s</b> (299 792 km/s exactement). La lumière du Soleil met ainsi environ 8 minutes à nous parvenir."},
+{d:0,l:2,q:"Quel détroit sépare l'Europe de l'Afrique ?",c:["Le Bosphore","Le détroit de Gibraltar","Le détroit d'Ormuz","Le détroit de Messine"],a:1,e:"<b>Gibraltar</b> : 14 km seulement entre l'Espagne et le Maroc. Le Bosphore, lui, sépare l'Europe de l'Asie à Istanbul."},
+{d:0,l:2,q:"La guerre de Cent Ans a principalement opposé…",c:["La France et l'Espagne","La France et l'Angleterre","L'Angleterre et l'Écosse","La France et le Saint-Empire"],a:1,e:"<b>France et Angleterre</b>, de 1337 à 1453 (116 ans, en réalité). C'est la guerre de Jeanne d'Arc et d'Azincourt."},
+{d:0,l:2,q:"Dans une cellule humaine, où se trouve l'essentiel de l'ADN ?",c:["Dans le cytoplasme","Dans le noyau","Dans la membrane","Dans les ribosomes"],a:1,e:"Dans le <b>noyau</b>, sous forme de 23 paires de chromosomes. Les mitochondries en contiennent aussi un peu — hérité uniquement de la mère."},
+{d:0,l:2,q:"Qui a composé « Les Quatre Saisons » ?",c:["Bach","Mozart","Vivaldi","Haendel"],a:2,e:"<b>Vivaldi</b>, vers 1723. Quatre concertos pour violon, un par saison — un des premiers exemples de « musique descriptive »."},
+{d:0,l:2,bi:1,q:"Quel est le pays le plus peuplé du monde aujourd'hui ?",c:["La Chine","L'Inde","Les États-Unis","L'Indonésie"],a:1,e:"<b>L'Inde</b> a dépassé la Chine en 2023 (plus de 1,4 milliard d'habitants). La population chinoise, elle, décline désormais."},
+{d:0,l:2,q:"Qui a établi le tableau périodique des éléments ?",c:["Lavoisier","Mendeleïev","Dalton","Curie"],a:1,e:"<b>Dmitri Mendeleïev</b>, en 1869. Génie du truc : il a laissé des cases vides en prédisant les éléments manquants — découverts ensuite."},
+{d:0,l:2,q:"Le Caravage est célèbre pour sa maîtrise de…",c:["La perspective aérienne","Le clair-obscur","Le pointillisme","La fresque"],a:1,e:"Le <b>clair-obscur</b> (ténébrisme) : des scènes plongées dans le noir, frappées d'une lumière brutale. Il a influencé tout le baroque européen."},
+{d:0,l:2,q:"Quelle bataille marque la défaite définitive de Napoléon en 1815 ?",c:["Austerlitz","Trafalgar","Waterloo","Leipzig"],a:2,e:"<b>Waterloo</b>, en Belgique, le 18 juin 1815. Austerlitz (1805) est au contraire sa plus belle victoire."},
+{d:0,l:2,q:"Quel est le rôle principal de l'hémoglobine ?",c:["Digérer les graisses","Transporter l'oxygène","Coaguler le sang","Produire des anticorps"],a:1,e:"Elle <b>transporte l'oxygène</b> des poumons vers les organes. C'est son fer qui donne au sang sa couleur rouge."},
+{d:0,l:2,q:"Quelle est la capitale du Canada ?",c:["Toronto","Vancouver","Montréal","Ottawa"],a:3,e:"<b>Ottawa</b> — même logique qu'en Australie : choisie comme compromis, ici entre anglophones et francophones, alors que Toronto est la plus grande ville."},
+{d:0,l:2,q:"Qui a écrit « 1984 » ?",c:["Aldous Huxley","George Orwell","Ray Bradbury","H.G. Wells"],a:1,e:"<b>George Orwell</b>, en 1949. Huxley a écrit l'autre grande dystopie, « Le Meilleur des mondes » — contrôle par le plaisir plutôt que par la peur."},
+{d:0,l:2,q:"Constantinople fut la capitale de quel empire pendant plus de 1 000 ans ?",c:["L'Empire ottoman","L'Empire byzantin","L'Empire perse","L'Empire romain d'Occident"],a:1,e:"L'<b>Empire byzantin</b> (romain d'Orient), de 330 à 1453, date de sa prise par les Ottomans — qui en firent ensuite leur propre capitale."},
+{d:0,l:2,q:"Que mesure le PIB d'un pays ?",c:["Sa dette publique","La richesse produite sur une période","Ses réserves de change","Le niveau de vie médian"],a:1,e:"La <b>valeur de la production de biens et services</b> sur une période (souvent un an). Il ne dit rien des inégalités ni du bien-être — d'où ses critiques."},
+{d:0,l:3,q:"Quel écrivain français a reçu le prix Nobel de littérature en 2014 ?",c:["Patrick Modiano","J.M.G. Le Clézio","Michel Houellebecq","Annie Ernaux"],a:0,e:"<b>Patrick Modiano</b>, pour son « art de la mémoire ». Le Clézio l'avait eu en 2008, Annie Ernaux en 2022."},
+{d:0,l:3,q:"Qui a démontré les théorèmes d'incomplétude, limites internes des mathématiques ?",c:["Alan Turing","Kurt Gödel","David Hilbert","Bertrand Russell"],a:1,e:"<b>Kurt Gödel</b> (1931) : tout système logique assez riche contient des vérités qu'il ne peut pas démontrer lui-même. Un séisme intellectuel du XXᵉ siècle."},
+{d:0,l:3,q:"La bataille d'Actium (31 av. J.-C.) a opposé Octave à…",c:["Jules César","Marc Antoine et Cléopâtre","Pompée","Hannibal"],a:1,e:"<b>Marc Antoine et Cléopâtre</b>, vaincus sur mer. Cette victoire fait d'Octave le maître de Rome : il deviendra Auguste, premier empereur."},
+{d:0,l:3,q:"Quel est l'élément le plus abondant de l'univers ?",c:["L'oxygène","Le carbone","L'hydrogène","L'hélium"],a:2,e:"L'<b>hydrogène</b> (~75 % de la matière ordinaire), suivi de l'hélium. Tous les éléments plus lourds ont été forgés dans les étoiles."},
+{d:0,l:3,q:"Le canal de Panama, inauguré en 1914, relie…",c:["Deux mers des Caraïbes","L'Atlantique et le Pacifique","Le Pacifique et l'océan Indien","L'Atlantique et le golfe du Mexique"],a:1,e:"<b>Atlantique et Pacifique</b>, évitant le contournement du cap Horn. Le premier chantier, mené par Ferdinand de Lesseps, fut un fiasco retentissant."},
+{d:0,l:3,q:"Qui a découvert la pénicilline, et en quelle année ?",c:["Pasteur, 1885","Fleming, 1928","Koch, 1905","Salk, 1952"],a:1,e:"<b>Alexander Fleming, 1928</b> — par accident, en remarquant qu'une moisissure tuait ses cultures de bactéries. Le premier antibiotique de l'histoire."},
+{d:0,l:3,q:"L'essentiel de la Grande Muraille visible aujourd'hui date de quelle dynastie ?",c:["Qin","Han","Ming","Tang"],a:2,e:"La dynastie <b>Ming</b> (1368-1644). Les Qin ont lancé le concept 1 500 ans plus tôt, mais leurs murs de terre ont presque disparu."},
+{d:0,l:3,q:"Quelle famille a dominé Florence et financé la Renaissance italienne ?",c:["Les Borgia","Les Sforza","Les Médicis","Les Este"],a:2,e:"Les <b>Médicis</b> — banquiers devenus princes et papes, mécènes de Botticelli, Michel-Ange et Galilée. Les Borgia, c'est Rome."},
+{d:0,l:3,q:"À quel philosophe doit-on l'« impératif catégorique » ?",c:["Kant","Nietzsche","Spinoza","Hegel"],a:0,e:"<b>Kant</b> : « Agis uniquement d'après la maxime qui fait que tu peux vouloir en même temps qu'elle devienne une loi universelle. » Le fondement de son éthique."},
+{d:0,l:3,q:"Qu'est-ce que l'inflation, au sens économique strict ?",c:["La hausse des salaires","La hausse générale et durable des prix","La dévaluation d'une monnaie","La hausse des taux d'intérêt"],a:1,e:"La <b>hausse générale et durable des prix</b>, qui érode le pouvoir d'achat. Les banques centrales visent souvent ~2 % par an — assez pour lubrifier l'économie sans l'emballer."},
+{d:0,l:3,bi:1,q:"Quel est le point le plus profond des océans ?",c:["La fosse de Porto Rico","La fosse des Mariannes","La fosse des Tonga","La fosse du Japon"],a:1,e:"La <b>fosse des Mariannes</b> (~11 000 m), dans le Pacifique. On y a envoyé moins d'humains qu'on n'en a envoyé sur la Lune."},
+{d:0,l:3,q:"Quel ballet de Stravinsky provoqua un scandale à sa création en 1913 ?",c:["Le Lac des cygnes","Le Sacre du printemps","Boléro","Casse-Noisette"],a:1,e:"<b>Le Sacre du printemps</b>, au Théâtre des Champs-Élysées : rythmes brutaux, dissonances — la salle en vint presque aux mains. Une date fondatrice de la musique moderne."},
+{d:0,l:3,q:"Qui est la seule personne à avoir reçu deux prix Nobel dans deux sciences différentes ?",c:["Albert Einstein","Marie Curie","Linus Pauling","Frederick Sanger"],a:1,e:"<b>Marie Curie</b> : physique en 1903 (radioactivité) et chimie en 1911 (radium, polonium). Pauling a eu chimie + paix, Sanger deux fois chimie."},
+{d:0,l:3,q:"Une année-lumière mesure…",c:["Un temps","Une distance","Une vitesse","Une luminosité"],a:1,e:"Une <b>distance</b> : celle que la lumière parcourt en un an, soit ~9 461 milliards de km. L'étoile la plus proche du Soleil est à 4,2 années-lumière."},
+{d:0,l:3,q:"Quel économiste est le père de la « main invisible » ?",c:["Karl Marx","John Maynard Keynes","Adam Smith","David Ricardo"],a:2,e:"<b>Adam Smith</b>, dans « La Richesse des nations » (1776) : la poursuite des intérêts individuels concourrait, comme guidée par une main invisible, à l'intérêt général."},
+/* ===== LOGIQUE & DÉDUCTION (d:1) ===== */
+{d:1,l:1,q:"Complète la suite : 2, 4, 8, 16, … ?",c:["24","30","32","64"],a:2,e:"Chaque terme est le <b>double</b> du précédent : 16 × 2 = <b>32</b>. C'est une suite géométrique de raison 2."},
+{d:1,l:1,q:"Marie est plus grande que Paul. Paul est plus grand que Jean. Qui est le plus petit ?",c:["Marie","Paul","Jean","On ne peut pas savoir"],a:2,e:"La relation « plus grand que » est <b>transitive</b> : Marie > Paul > Jean, donc <b>Jean</b> est le plus petit. La déduction en chaîne, base du raisonnement."},
+{d:1,l:1,bi:1,q:"Complète la suite : 1, 1, 2, 3, 5, 8, … ?",c:["11","12","13","15"],a:2,e:"La suite de <b>Fibonacci</b> : chaque terme est la somme des deux précédents, donc 5 + 8 = <b>13</b>. On la retrouve partout dans la nature — tournesols, coquillages, pommes de pin."},
+{d:1,l:1,q:"Tous les chats sont des animaux. Félix est un chat. Donc…",c:["Félix est un animal","Tous les animaux sont des chats","Félix n'est pas un chien","On ne peut rien conclure"],a:0,e:"Un <b>syllogisme</b> valide : si tout A est B, et que X est A, alors X est B. Attention à l'inverse (« tous les animaux sont des chats »), qui est le piège classique."},
+{d:1,l:1,q:"Un fermier a 17 moutons. Tous meurent sauf 9. Combien en reste-t-il ?",c:["8","9","17","0"],a:1,e:"<b>9</b> — c'est littéralement ce que dit la phrase (« sauf 9 »). Notre cerveau veut calculer 17 − 9 = 8 par réflexe. Lire l'énoncé bat souvent le calcul."},
+{d:1,l:1,q:"Quel est l'intrus : pomme, poire, carotte, cerise ?",c:["Pomme","Poire","Carotte","Cerise"],a:2,e:"La <b>carotte</b> est un légume (une racine), les trois autres sont des fruits. Le classement par catégories est un exercice de base de l'abstraction."},
+{d:1,l:1,q:"Complète la suite : 100, 90, 81, 73, … ?",c:["66","65","64","63"],a:0,e:"On retire 10, puis 9, puis 8, puis 7 : 73 − 7 = <b>66</b>. Quand l'écart entre les termes change, regarde… l'écart entre les écarts."},
+{d:1,l:1,q:"Oiseau est à nid ce qu'abeille est à…",c:["Miel","Ruche","Fleur","Essaim"],a:1,e:"L'analogie porte sur l'<b>habitat</b> : l'oiseau vit dans le nid, l'abeille dans la <b>ruche</b>. Le miel est sa production, pas son logis."},
+{d:1,l:2,bi:1,q:"Une raquette et une balle coûtent 1,10 €. La raquette coûte 1 € de plus que la balle. Combien coûte la balle ?",c:["10 centimes","5 centimes","1 euro","15 centimes"],a:1,e:"<b>5 centimes</b> : la raquette coûte alors 1,05 € et l'écart est bien de 1 €. Si la balle coûtait 10 centimes, la raquette coûterait 1,10 € et le total 1,20 €. Ce test (de Kahneman) piège plus de 50 % des étudiants de grandes universités."},
+{d:1,l:2,q:"5 machines mettent 5 minutes à produire 5 pièces. Combien de temps mettent 100 machines pour 100 pièces ?",c:["100 minutes","20 minutes","5 minutes","1 minute"],a:2,e:"<b>5 minutes</b> : chaque machine fait 1 pièce en 5 minutes, quel que soit leur nombre. L'intuition « proportionnelle » (100 minutes) est le réflexe à débrancher."},
+{d:1,l:2,q:"Complète la suite : 3, 4, 6, 9, 13, 18, … ?",c:["22","23","24","25"],a:2,e:"Les écarts augmentent de 1 à chaque fois : +1, +2, +3, +4, +5, donc +6 → <b>24</b>."},
+{d:1,l:2,q:"Aucun poisson ne vole. Certains animaux volent. Que peut-on conclure ?",c:["Certains animaux ne sont pas des poissons","Aucun animal n'est un poisson","Certains poissons sont des animaux","Rien du tout"],a:0,e:"Les animaux qui volent ne peuvent pas être des poissons, donc <b>certains animaux ne sont pas des poissons</b>. Les syllogismes se vérifient en dessinant mentalement des cercles (diagrammes de Venn)."},
+{d:1,l:2,q:"Un nénuphar double de surface chaque jour et couvre l'étang en 48 jours. Quand couvrait-il la moitié de l'étang ?",c:["Au jour 24","Au jour 47","Au jour 36","Au jour 46"],a:1,e:"Au <b>jour 47</b> : s'il double chaque jour, la veille du jour final il en couvrait la moitié. La croissance exponentielle défie notre intuition linéaire — même piège avec les épidémies ou les intérêts composés."},
+{d:1,l:2,q:"Je suis un nombre à deux chiffres. La somme de mes chiffres est 9, et si on inverse mes chiffres, j'augmente de 27. Qui suis-je ?",c:["27","36","45","63"],a:1,e:"<b>36</b> : 3 + 6 = 9, et 63 − 36 = 27. Méthode : tester les candidats (18, 27, 36, 45…) contre les deux contraintes — l'élimination systématique est plus fiable que l'intuition."},
+{d:1,l:2,q:"Trois interrupteurs en bas, une ampoule au grenier. Un seul aller-retour autorisé. Comment identifier le bon interrupteur ?",c:["Impossible avec un seul trajet","Allumer le 1ᵉʳ 10 min, l'éteindre, allumer le 2ᵉ, puis monter","Allumer les trois en même temps","Allumer le 1ᵉʳ et le 2ᵉ ensemble"],a:1,e:"On utilise un <b>deuxième canal d'information : la chaleur</b>. Ampoule allumée = interrupteur 2 ; éteinte mais chaude = interrupteur 1 ; éteinte et froide = interrupteur 3. Les meilleures solutions sortent souvent du cadre donné."},
+{d:1,l:2,q:"Complète la suite de lettres : A, C, F, J, O, … ?",c:["S","T","U","V"],a:2,e:"Les écarts croissent : +2, +3, +4, +5, puis +6 → <b>U</b>. En positions : 1, 3, 6, 10, 15, 21 — les nombres triangulaires."},
+{d:1,l:3,q:"Jeu des 3 portes : tu en choisis une, l'animateur (qui sait où est le prix) ouvre une porte perdante parmi les deux autres. Faut-il changer de porte ?",c:["Non, c'est 50/50","Oui, ça double mes chances","Peu importe","Oui, mais le gain est négligeable"],a:1,e:"Le <b>problème de Monty Hall</b> : changer fait passer de 1/3 à <b>2/3</b> de chances. Ton premier choix avait 1/3 ; les 2/3 restants se concentrent sur la porte que l'animateur n'a pas ouverte. Même des mathématiciens s'y sont trompés publiquement."},
+{d:1,l:3,q:"Certains consultants sont ingénieurs. Tous les ingénieurs savent compter. Que peut-on conclure ?",c:["Tous les consultants savent compter","Certains consultants savent compter","Aucun consultant ne sait compter","Ceux qui savent compter sont ingénieurs"],a:1,e:"Seulement que <b>certains consultants savent compter</b> (ceux qui sont ingénieurs). Généraliser à « tous » est le glissement logique le plus fréquent dans les argumentaires."},
+{d:1,l:3,q:"Complète la suite : 2, 3, 5, 7, 11, 13, … ?",c:["15","16","17","19"],a:2,e:"Les <b>nombres premiers</b> : divisibles uniquement par 1 et eux-mêmes. Après 13 vient <b>17</b> (15 = 3×5 est exclu)."},
+{d:1,l:3,q:"Dans un groupe de 23 personnes, quelle est la probabilité que deux partagent le même jour d'anniversaire ?",c:["Environ 6 %","Environ 23 %","Environ 50 %","Environ 75 %"],a:2,e:"<b>~50 %</b> — le « paradoxe des anniversaires ». On raisonne à tort sur « quelqu'un partage MON anniversaire » alors qu'il s'agit de <b>toutes les paires possibles</b> : il y en a 253 dans un groupe de 23."},
+{d:1,l:3,bi:1,q:"Un escargot grimpe 3 m le jour et glisse de 2 m la nuit. Le puits fait 10 m. En combien de jours sort-il ?",c:["10 jours","9 jours","8 jours","7 jours"],a:2,e:"<b>8 jours</b> : il gagne 1 m net par cycle, mais au matin du 8ᵉ jour il part de 7 m et atteint 10 m <b>avant</b> de glisser. L'erreur classique : appliquer la moyenne (1 m/jour → 10 jours) sans voir l'effet de seuil final."},
+{d:1,l:3,q:"Complète la suite : 1, 11, 21, 1211, 111221, … ?",c:["312211","122111","211122","221131"],a:0,e:"La suite « <b>look-and-say</b> » : chaque terme décrit le précédent à voix haute. 111221 = « trois 1, deux 2, un 1 » → <b>312211</b>. Le réflexe arithmétique ne mène nulle part ici — il faut changer de représentation."},
+{d:1,l:3,q:"Deux gardes : l'un ment toujours, l'autre dit toujours vrai. Une seule question pour trouver la bonne porte. Laquelle ?",c:["« Où est la bonne porte ? »","« Es-tu le menteur ? »","« Que me répondrait l'autre garde ? » (et prendre l'inverse)","Impossible en une question"],a:2,e:"En demandant <b>ce que dirait l'autre</b>, la réponse passe forcément par un menteur exactement une fois — elle est donc toujours fausse : il suffit de prendre l'inverse. Composer les points de vue neutralise l'incertitude."},
+{d:1,l:3,q:"Un père et son fils ont 66 ans à eux deux. Le père a 30 ans de plus que le fils. Quel âge a le fils ?",c:["36 ans","33 ans","18 ans","16 ans"],a:2,e:"<b>18 ans</b> : (66 − 30) ÷ 2 = 18, et le père a 48 ans. Mise en équation simple : F + (F + 30) = 66. L'erreur fréquente : répondre 36 en soustrayant sans diviser."},
+/* ===== PLM & CONSULTING (d:2) ===== */
+{d:2,l:1,q:"Que signifie l'acronyme PLM ?",c:["Product Line Management","Product Lifecycle Management","Production Logistics Management","Project Lifecycle Method"],a:1,e:"<b>Product Lifecycle Management</b> : la gestion du produit de l'idée au retrait, en passant par la conception, l'industrialisation et le support. Bien plus qu'un outil : une colonne vertébrale de données."},
+{d:2,l:1,bi:1,q:"Qu'est-ce qu'une BOM ?",c:["Un planning de production","La nomenclature structurée des composants d'un produit","Un rapport de non-conformité","Le cahier des charges client"],a:1,e:"La <b>Bill of Materials</b> : la liste hiérarchisée de tous les composants et sous-ensembles d'un produit, avec quantités. C'est LE référentiel central que le PLM doit fiabiliser."},
+{d:2,l:1,q:"Quelle est la différence entre EBOM et MBOM ?",c:["Aucune, ce sont des synonymes","EBOM = vue ingénierie, MBOM = vue fabrication","EBOM = électronique, MBOM = mécanique","MBOM = version obsolète de l'EBOM"],a:1,e:"L'<b>EBOM</b> décrit le produit tel que <b>conçu</b> (logique fonctionnelle), la <b>MBOM</b> tel que <b>fabriqué</b> (gammes, consommables, regroupements atelier). La transformation EBOM→MBOM est un des sujets les plus sensibles d'un projet PLM."},
+{d:2,l:1,q:"Un système PDM gère avant tout…",c:["La paie des ingénieurs","Les données et fichiers de CAO (versions, accès, statuts)","La relation client","Les stocks de l'usine"],a:1,e:"Le <b>Product Data Management</b> gère le coffre-fort CAO : versions, check-in/check-out, droits, statuts de maturité. C'est historiquement le noyau depuis lequel le PLM s'est étendu."},
+{d:2,l:1,q:"Qui édite la plateforme 3DEXPERIENCE ?",c:["Siemens","PTC","Dassault Systèmes","SAP"],a:2,e:"<b>Dassault Systèmes</b> — la plateforme regroupe CATIA (CAO), ENOVIA (gestion de données), SIMULIA (simulation), DELMIA (fabrication)…"},
+{d:2,l:1,q:"Teamcenter est le PLM de quel éditeur ?",c:["Siemens","Oracle","Autodesk","IBM"],a:0,e:"<b>Siemens Digital Industries Software</b>, aux côtés de NX pour la CAO. L'un des PLM les plus déployés au monde, notamment dans l'automobile et l'aéronautique."},
+{d:2,l:1,q:"Windchill est édité par…",c:["Aras","PTC","Infor","Hexagon"],a:1,e:"<b>PTC</b>, avec Creo côté CAO. PTC pousse aussi fort sur l'IoT industriel (ThingWorx) et la réalité augmentée (Vuforia)."},
+{d:2,l:1,q:"Dans un processus de modification, que désigne un ECR ?",c:["L'ordre d'exécution de la modification","La demande de modification (à instruire)","La notification de fin de modification","Le rapport de test"],a:1,e:"L'<b>Engineering Change Request</b> : la <b>demande</b>, qui sera analysée (impacts, coûts) avant de devenir un ECO (ordre) puis éventuellement un ECN (notification). Demande → décision → exécution → communication."},
+{d:2,l:1,q:"Quel est l'ordre logique du cycle de vie produit ?",c:["Production → conception → retrait → support","Conception → industrialisation → production → support → retrait","Industrialisation → conception → production → support","Conception → production → industrialisation → retrait"],a:1,e:"<b>Conception → industrialisation → production → support/maintenance → retrait</b>. Le PLM vise la continuité numérique sur toute cette chaîne — y compris la fin de vie, souvent négligée."},
+{d:2,l:1,q:"Le format STEP sert à…",c:["Compresser des images 3D","Échanger des modèles CAO entre systèmes hétérogènes","Sauvegarder des emails techniques","Programmer des automates"],a:1,e:"<b>STEP</b> (ISO 10303) est le format <b>neutre</b> d'échange de données produit : il permet de transférer une géométrie 3D entre CATIA, NX, Creo… sans dépendre d'un éditeur."},
+{d:2,l:2,bi:1,q:"Quelle est la différence entre jumeau numérique et fil numérique (digital twin / digital thread) ?",c:["Ce sont deux noms du même concept","Le jumeau est la réplique virtuelle d'un produit ; le fil est la continuité des données tout au long du cycle de vie","Le fil numérique ne concerne que la CAO","Le jumeau numérique est réservé aux bâtiments"],a:1,e:"Le <b>digital twin</b> est la réplique virtuelle d'un produit ou d'une ligne, alimentée par des données réelles. Le <b>digital thread</b> est le fil conducteur qui relie les données de bout en bout (exigences → conception → fabrication → service). Le second rend le premier possible."},
+{d:2,l:2,q:"En gestion de configuration, une « baseline » est…",c:["La version la moins chère du produit","Une référence figée et approuvée à un instant donné","La première esquisse d'un concept","Le planning initial du projet"],a:1,e:"Une <b>référence gelée</b> (configuration approuvée) qui sert de point de comparaison : toute évolution ultérieure passe par le processus de modification. Sans baselines, impossible de savoir « ce qui a été livré à qui »."},
+{d:2,l:2,q:"Que signifie MBSE ?",c:["Model-Based Systems Engineering","Management By System Efficiency","Model-Based Software Estimation","Manufacturing Baseline System Engineering"],a:0,e:"L'<b>ingénierie système fondée sur les modèles</b> : remplacer les specs documentaires par des modèles (souvent en SysML) reliant exigences, fonctions et architecture. Un sujet chaud dans l'aéro, la défense et l'auto."},
+{d:2,l:2,q:"Aras Innovator est souvent choisi pour…",c:["Son moteur de CAO intégré","Sa flexibilité de customisation (plateforme low-code) et son modèle de licence","Sa spécialisation exclusive dans le textile","Son intégration native à Excel uniquement"],a:1,e:"<b>Aras</b> se positionne comme la plateforme PLM <b>flexible et ouverte</b> : modèle de données très customisable, montées de version qui préservent les customisations — un argument différenciant face aux acteurs historiques."},
+{d:2,l:2,q:"Dans un PLM, l'« effectivité » (effectivity) d'une modification définit…",c:["Son coût de mise en œuvre","À partir de quand ou de quel numéro de série elle s'applique","Le nom de son approbateur","Sa probabilité de réussite"],a:1,e:"L'<b>effectivité</b> précise le périmètre d'application : par <b>date</b> ou par <b>numéro de série/lot</b> (« applicable à partir de l'avion n°112 »). Indispensable pour savoir exactement quelle configuration vole, roule ou navigue."},
+{d:2,l:2,q:"Dans une intégration PLM → ERP, que transfère-t-on typiquement ?",c:["Les fichiers CAO natifs complets","Les articles et nomenclatures (MBOM) validés","Les emails du bureau d'études","Les comptes utilisateurs"],a:1,e:"Le PLM publie vers l'ERP les <b>articles et la MBOM validés</b> (avec statuts et modifications) pour alimenter achats, stocks et production. La règle d'or : le PLM est maître de la définition produit, l'ERP de l'exécution."},
+{d:2,l:2,q:"Dans une matrice RACI, le « A » désigne…",c:["Celui qui fait le travail","Celui qui rend des comptes (un seul par tâche)","Celui qu'on consulte","Celui qu'on informe"],a:1,e:"<b>Accountable</b> : le responsable ultime, celui qui répond du résultat — et il ne doit y en avoir <b>qu'un seul</b> par activité. Le R (Responsible) fait, le A assume. Deux A sur une ligne = un conflit programmé."},
+{d:2,l:2,q:"La méthode MoSCoW sert à…",c:["Planifier les congés d'équipe","Prioriser les exigences (Must, Should, Could, Won't)","Évaluer les fournisseurs russes","Calculer le budget d'un projet"],a:1,e:"<b>Must / Should / Could / Won't have</b> : un cadre simple pour trancher le périmètre d'un déploiement. En PLM, résister au « tout est Must » du métier est un art du consultant."},
+{d:2,l:2,q:"Que désignent AS-IS et TO-BE dans une mission de conseil ?",c:["Deux versions d'un logiciel","L'état actuel des processus et l'état cible","Le budget initial et le budget final","Deux méthodes d'audit financier"],a:1,e:"L'<b>AS-IS</b> décrit les processus tels qu'ils fonctionnent aujourd'hui (avec leurs irritants), le <b>TO-BE</b> la cible. Le piège classique : sous-investir l'AS-IS et concevoir une cible déconnectée du terrain."},
+{d:2,l:2,q:"ADKAR est un modèle de…",c:["Chiffrage de projet","Conduite du changement","Modélisation 3D","Gestion des risques fournisseurs"],a:1,e:"<b>Awareness, Desire, Knowledge, Ability, Reinforcement</b> : les 5 étapes qu'un individu traverse pour adopter un changement. Utile en déploiement PLM, où l'échec est plus souvent humain que technique."},
+{d:2,l:3,bi:1,q:"Qu'est-ce qu'une « 150 % BOM » ?",c:["Une nomenclature avec 50 % de marge de coût","Une nomenclature générique contenant toutes les variantes possibles, dont on dérive les 100 % BOM","Une BOM erronée à corriger","Une BOM incluant les pièces de rechange"],a:1,e:"La <b>150 % BOM</b> (ou BOM générique) contient <b>toutes les options et variantes</b> d'une famille de produits. En appliquant une configuration (règles + options choisies), on en dérive la <b>100 % BOM</b> d'un produit précis. Le cœur de la gestion de variantes automobile."},
+{d:2,l:3,q:"Le format JT est…",c:["Un format de calcul de structure","Un format léger de visualisation 3D (ISO 14306)","Un langage de programmation d'automates","Un format d'archivage de documents papier"],a:1,e:"<b>JT</b> est le format léger de visualisation/maquette numérique, normalisé ISO 14306 et historiquement poussé par Siemens. Il permet de manipuler des maquettes énormes sans ouvrir la CAO native."},
+{d:2,l:3,q:"CMII est une méthodologie de référence pour…",c:["Le lean manufacturing","La gestion de configuration et des modifications","Le marketing produit","La cybersécurité industrielle"],a:1,e:"<b>CMII</b> (Institute for Process Excellence) formalise la gestion de configuration et de changement en boucle fermée : exigences claires, modifications rapides et traçables. Souvent citée comme socle des processus de change management en PLM."},
+{d:2,l:3,q:"Que distingue ETO, CTO et MTS ?",c:["Trois formats de fichiers CAO","Trois stratégies de production : à la commande (conçu / configuré) ou sur stock","Trois niveaux de maturité PLM","Trois types de contrats de conseil"],a:1,e:"<b>Engineer-to-Order</b> (conçu à la commande, ex. machines spéciales), <b>Configure-to-Order</b> (assemblé à partir d'options, ex. automobile), <b>Make-to-Stock</b> (produit sur stock, ex. grande conso). La stratégie détermine profondément l'architecture PLM et la gestion des BOM."},
+{d:2,l:3,q:"Dans un déploiement PLM, « OOTB » désigne…",c:["Un indicateur de performance","Les fonctionnalités standard de l'outil, par opposition aux customisations","Un format d'échange de données","Une méthode d'estimation des charges"],a:1,e:"<b>Out Of The Box</b> : ce que l'outil fait en standard. La doctrine actuelle : maximiser l'OOTB et adapter les processus, car chaque customisation se paie à chaque montée de version. Un grand classique des arbitrages en comité projet."},
+{d:2,l:3,q:"Quels bénéfices met-on le plus souvent en avant dans le ROI d'un projet PLM ?",c:["Réduction du time-to-market, des coûts de non-qualité et meilleure réutilisation","Hausse du chiffre d'affaires publicitaire","Réduction des impôts de production","Baisse du prix des licences bureautiques"],a:0,e:"Les classiques : <b>time-to-market réduit</b> (données fiables, itérations plus rapides), <b>moins de non-qualité</b> (erreurs de configuration, mauvaises versions) et <b>réutilisation</b> (pièces, designs). Le plus dur : les quantifier de façon crédible pour le CFO."},
+{d:2,l:3,q:"« Brownfield » vs « greenfield » dans un projet de déploiement :",c:["Petit projet vs grand projet","Déploiement avec un existant à migrer vs déploiement à partir de zéro","Projet en régie vs au forfait","Site pollué vs site propre uniquement"],a:1,e:"<b>Greenfield</b> : on part d'une feuille blanche. <b>Brownfield</b> : il faut composer avec l'existant — données legacy, processus en place, habitudes. 90 % des projets PLM réels sont des brownfields, et la migration de données y est le risque n°1."},
+{d:2,l:3,q:"Quel est l'enchaînement correct d'un processus de modification complet ?",c:["ECO → ECR → ECN","ECR → analyse d'impact → ECO → ECN","ECN → ECO → ECR","Analyse d'impact → ECR → ECN → ECO"],a:1,e:"<b>ECR</b> (demande) → <b>analyse d'impact</b> (coûts, stocks, délais, périmètre) → <b>ECO</b> (ordre approuvé et exécuté) → <b>ECN</b> (notification aux parties prenantes). Court-circuiter l'analyse d'impact est la cause classique des modifications qui coûtent 10 fois leur estimation."},
+{d:2,l:3,q:"Qu'est-ce que l'ALM, et pourquoi converge-t-il avec le PLM ?",c:["Asset Lifecycle Management, pour les bâtiments","Application Lifecycle Management : le cycle de vie du logiciel, clé car les produits deviennent des systèmes à forte part logicielle","Advanced Lean Manufacturing","Automated Line Monitoring"],a:1,e:"L'<b>ALM</b> gère exigences, code, tests et versions du <b>logiciel</b>. Comme une voiture moderne contient plus de 100 millions de lignes de code, relier ALM et PLM (traçabilité exigence → pièce → logiciel) est devenu un enjeu majeur — et un beau terrain pour les consultants."},
+{d:2,l:3,q:"Migration de données PLM : que signifie une approche « big bang » ?",c:["Supprimer les données legacy sans reprise","Tout migrer et basculer en une seule fois, par opposition à une migration progressive","Migrer uniquement les données de l'année en cours","Faire migrer les utilisateurs sans les données"],a:1,e:"<b>Big bang</b> : bascule unique — plus simple à orchestrer mais risque concentré. <b>Progressive</b> (par site, par programme, par maturité) : risque étalé mais double-run coûteux et synchronisations complexes. Le choix dépend du volume, de la qualité des données et de la tolérance au risque du client."},
+/* ===== ESPRIT CRITIQUE & BIAIS (d:3) ===== */
+{d:3,l:1,bi:1,q:"Chercher et retenir surtout les informations qui confirment ce qu'on pense déjà, c'est…",c:["Le biais d'ancrage","Le biais de confirmation","L'effet de halo","Le biais du survivant"],a:1,e:"Le <b>biais de confirmation</b> — le plus puissant de tous. Antidote : chercher activement ce qui pourrait te donner tort (« qu'est-ce qui me ferait changer d'avis ? »). Les réseaux sociaux l'amplifient en te servant ce que tu aimes déjà."},
+{d:3,l:1,q:"Les ventes de glaces et les noyades augmentent ensemble en été. Conclusion ?",c:["Les glaces causent les noyades","Corrélation n'est pas causalité : une 3ᵉ variable (la chaleur) explique les deux","Il faut interdire les glaces à la plage","Les données sont forcément fausses"],a:1,e:"<b>Corrélation ≠ causalité</b> : ici la chaleur pousse à la fois à acheter des glaces et à se baigner. Réflexe à avoir devant toute statistique : « quelle variable cachée pourrait expliquer les deux ? »"},
+{d:3,l:1,q:"« De toute façon, il est incompétent, donc son argument est faux. » C'est…",c:["Un argument d'autorité","Un argument ad hominem","Un faux dilemme","Une pétition de principe"],a:1,e:"L'<b>ad hominem</b> : attaquer la personne au lieu de l'argument. Or un argument est vrai ou faux indépendamment de qui le prononce — même une personne peu fiable peut avoir raison."},
+{d:3,l:1,q:"Déformer la position de quelqu'un pour mieux la réfuter, c'est le sophisme…",c:["De la pente glissante","De l'homme de paille","Du faux dilemme","De l'appel à la popularité"],a:1,e:"L'<b>homme de paille</b> : on construit une caricature de la thèse adverse et on détruit la caricature. Test simple : « la personne reconnaîtrait-elle sa position dans ce que j'en dis ? »"},
+{d:3,l:1,q:"« Soit tu es avec nous, soit tu es contre nous. » Quel est le problème ?",c:["C'est un faux dilemme : il existe d'autres options","C'est un ad hominem","C'est un appel à la tradition","Aucun, c'est logiquement valide"],a:0,e:"Le <b>faux dilemme</b> réduit artificiellement le champ des possibles à deux options. La réalité offre presque toujours des positions intermédiaires ou orthogonales. Très utilisé en rhétorique politique et commerciale."},
+{d:3,l:2,q:"En négociation, le premier prix annoncé influence fortement le prix final, même s'il est absurde. C'est…",c:["Le biais de disponibilité","Le biais d'ancrage","L'aversion à la perte","Le biais rétrospectif"],a:1,e:"L'<b>ancrage</b> : le premier chiffre posé devient la référence dont on s'écarte insuffisamment. Application pratique : dans un chiffrage ou une négo salariale, celui qui pose l'ancre a un avantage réel."},
+{d:3,l:2,bi:1,q:"En 1943, on voulait blinder les avions là où les appareils revenus étaient criblés d'impacts. Le statisticien Abraham Wald a recommandé l'inverse. Pourquoi ?",c:["Les impacts abîmaient le blindage","Les avions touchés ailleurs ne revenaient pas : c'est le biais du survivant","Le blindage était trop lourd de toute façon","Les données étaient falsifiées"],a:1,e:"Le <b>biais du survivant</b> : on n'observait que les avions <b>rentrés</b>. Les zones intactes sur les survivants étaient précisément celles où un tir était fatal. Même piège quand on étudie « les habitudes des milliardaires » : on oublie tous ceux qui ont fait pareil et échoué."},
+{d:3,l:2,q:"Continuer un projet mal parti « parce qu'on a déjà trop investi », c'est…",c:["Le biais des coûts irrécupérables","Le biais d'optimisme","L'effet Dunning-Kruger","Le biais de cadrage"],a:0,e:"Les <b>coûts irrécupérables</b> (sunk costs) : l'argent dépensé est perdu quoi qu'il arrive, il ne devrait donc jamais peser dans la décision d'avenir. La bonne question : « si je partais de zéro aujourd'hui, est-ce que je lancerais ce projet ? »"},
+{d:3,l:2,q:"Moins on est compétent dans un domaine, plus on tend à surestimer son niveau. C'est…",c:["Le syndrome de l'imposteur","L'effet Dunning-Kruger","Le biais d'autocomplaisance","L'effet Barnum"],a:1,e:"L'effet <b>Dunning-Kruger</b> : il faut de la compétence pour mesurer son incompétence. Le miroir inverse existe : les experts sous-estiment souvent leur avance (ils croient que « tout le monde sait ça »)."},
+{d:3,l:2,q:"On surestime le risque d'attaque de requin mais on sous-estime celui de la route. Pourquoi ?",c:["Biais de disponibilité : les événements marquants viennent plus facilement à l'esprit","Parce que les requins sont réellement plus dangereux","Biais d'ancrage sur les chiffres officiels","Effet de simple exposition"],a:0,e:"Le <b>biais de disponibilité</b> : on juge une probabilité à la facilité avec laquelle des exemples nous viennent en tête — et les médias sur-représentent le spectaculaire. Les morts silencieuses (route, sédentarité) sont systématiquement sous-perçues."},
+{d:3,l:3,bi:1,q:"Une maladie touche 1 personne sur 1 000. Un test fiable à 95 % te déclare positif. Quelle est environ la probabilité que tu sois vraiment malade ?",c:["95 %","50 %","Environ 2 %","0,1 %"],a:2,e:"<b>~2 %</b> ! Sur 1 000 personnes : 1 vrai malade, mais ~50 faux positifs (5 % de 999). Ton positif a donc ~1 chance sur 51 d'être vrai. C'est l'<b>oubli de la fréquence de base</b> — l'erreur de raisonnement la plus lourde de conséquences en médecine et en justice."},
+{d:3,l:3,q:"« J'ai pris ce remède, mon rhume a disparu en une semaine : il fonctionne. » Quel est le raisonnement fautif ?",c:["Post hoc ergo propter hoc : après cela, donc à cause de cela","L'homme de paille","L'appel à l'autorité","Le biais d'ancrage"],a:0,e:"<b>Post hoc ergo propter hoc</b> : la succession temporelle ne prouve pas la causalité — un rhume guérit seul en une semaine. C'est exactement pour neutraliser ce piège qu'on invente l'essai clinique contre placebo."},
+{d:3,l:3,q:"Un candidat séduisant et à l'aise est jugé aussi plus compétent, sans preuve. C'est…",c:["L'effet de halo","Le biais du survivant","L'aversion à la perte","Le biais de statu quo"],a:0,e:"L'<b>effet de halo</b> : une caractéristique saillante (beauté, aisance, diplôme) contamine le jugement sur des qualités sans rapport. Documenté partout : recrutement, tribunaux, notation scolaire. Antidote : évaluer critère par critère, sur grille."},
+{d:3,l:3,q:"Un pilote réprimandé après un très mauvais vol fait mieux ensuite ; félicité après un excellent vol, il fait moins bien. La punition marche donc mieux ?",c:["Oui, c'est prouvé","Non : c'est la régression vers la moyenne — les performances extrêmes sont suivies de performances plus normales","Oui, mais seulement en aviation","Non, c'est l'effet placebo"],a:1,e:"La <b>régression vers la moyenne</b> (exemple célèbre de Kahneman) : une performance exceptionnelle — bonne ou mauvaise — est en partie due au hasard, et la suivante revient mécaniquement vers la moyenne. On attribue à tort ce retour à notre intervention."},
+{d:3,l:3,q:"Un chirurgien annonce « 90 % de survie » plutôt que « 10 % de mortalité ». L'adhésion des patients change fortement. C'est…",c:["Le biais de cadrage (framing)","Le biais de confirmation","L'effet Dunning-Kruger","La pente glissante"],a:0,e:"Le <b>cadrage</b> : la même information, présentée en gain ou en perte, change la décision — alors que rien de factuel ne diffère. En mission comme en négo, celui qui choisit le cadre choisit à moitié la conclusion. Relis toujours un chiffre dans le cadre inverse."},
+];
+/* Bilan initial : les 12 questions marquées bi:1 (3 par domaine, difficultés 1-2-3) */
+const BILAN_IDS = BANK.map((q,i)=>q.bi?i:-1).filter(i=>i>=0);
+
+/* ============ ÉTAT ============ */
+const APP_VERSION = "1.2";
+/* PWA : service worker pour l'installation et le mode hors-ligne */
+try {
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+  }
+} catch(e) {}
+/* Progression préchargée (celle d'Antoine au moment de la mise à niveau).
+   Utilisée uniquement si aucune sauvegarde automatique n'existe encore. */
+const PRELOADED = "CTX1-eyJ2IjoxLCJ4IjoxOTQsInMiOjEsImQiOiIyMDI2LTA3LTExIiwibCI6WzMsMywzLDJdLCJiIjoxLCJxIjpbMCwxOCwyMywyOSw0Miw0OSw1NSw2Myw2Nyw3Miw4MSw5MSwxMDAsMTAxLDEwNywxMTEsMTE0XX0";
+/* Sauvegarde interne : active dès que le navigateur le permet (fichier ouvert
+   dans Chrome/Firefox/Safari). Dans certains aperçus intégrés, le stockage est
+   bloqué : on retombe alors sur le code de sauvegarde manuel. */
+const SKEY = "cortex_save_v1";
+let CAN_STORE = false;
+try { window.localStorage.setItem("cortex_probe","1"); window.localStorage.removeItem("cortex_probe"); CAN_STORE = true; } catch(e) {}
+function storeGet(){ try { return window.localStorage.getItem(SKEY); } catch(e){ return null; } }
+function autoSave(){ if(!S) return; try { window.localStorage.setItem(SKEY, encodeState()); } catch(e) {} }
+
+let S = null; // {xp, streak, lastDay, lvl:[4], seen:Set, bilanDone}
+const $ = id => document.getElementById(id);
+const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+
+function freshState(){ return {xp:0, streak:0, lastDay:"", lvl:[1,1,1,1], seen:new Set(), bilanDone:false}; }
+
+/* --- code de sauvegarde --- */
+function encodeState(){
+  const seenArr=[...S.seen].sort((a,b)=>a-b);
+  const obj={v:1,x:S.xp,s:S.streak,d:S.lastDay,l:S.lvl,b:S.bilanDone?1:0,q:seenArr};
+  const json=JSON.stringify(obj);
+  return "CTX1-"+btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function decodeState(code){
+  try{
+    code=code.trim();
+    if(!code.startsWith("CTX1-")) return null;
+    let b64=code.slice(5).replace(/-/g,"+").replace(/_/g,"/");
+    while(b64.length%4) b64+="=";
+    const obj=JSON.parse(decodeURIComponent(escape(atob(b64))));
+    if(obj.v!==1||!Array.isArray(obj.l)) return null;
+    return {xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:obj.l.map(n=>Math.min(3,Math.max(1,n|0))), seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b};
+  }catch(e){ return null; }
+}
+
+/* --- streak --- */
+function touchStreak(){
+  const t=todayStr();
+  if(S.lastDay===t) return;
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const yStr=y.getFullYear()+"-"+String(y.getMonth()+1).padStart(2,"0")+"-"+String(y.getDate()).padStart(2,"0");
+  S.streak = (S.lastDay===yStr) ? S.streak+1 : 1;
+  S.lastDay=t;
+}
+
+/* --- rangs --- */
+function rankOf(xp){ let r=RANKS[0], n=null; for(let i=0;i<RANKS.length;i++){ if(xp>=RANKS[i][0]) r=RANKS[i]; else {n=RANKS[i]; break;} } return {cur:r, next:n}; }
+
+/* ============ SÉLECTION DES QUESTIONS ============ */
+function poolFor(d, lvl){
+  let p=BANK.map((q,i)=>({q,i})).filter(o=>o.q.d===d && !S.seen.has(o.i) && o.q.l===lvl);
+  if(!p.length) p=BANK.map((q,i)=>({q,i})).filter(o=>o.q.d===d && !S.seen.has(o.i));
+  if(!p.length){ // domaine épuisé : on libère les plus anciennes vues de ce domaine
+    BANK.forEach((q,i)=>{ if(q.d===d) S.seen.delete(i); });
+    p=BANK.map((q,i)=>({q,i})).filter(o=>o.q.d===d);
+  }
+  return p;
+}
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function buildSession(){
+  const order=[0,1,2,3].sort(()=>Math.random()-0.5);
+  const qs=[];
+  order.forEach(d=>{ const o=pick(poolFor(d,S.lvl[d])); qs.push(o); });
+  // 5e question : domaine au niveau le plus bas (renforcement)
+  const weakest=[0,1,2,3].reduce((a,b)=>S.lvl[a]<=S.lvl[b]?a:b);
+  let extra=pick(poolFor(weakest,S.lvl[weakest]));
+  let guard=0;
+  while(qs.some(o=>o.i===extra.i)&&guard++<20) extra=pick(poolFor(weakest,S.lvl[weakest]));
+  qs.push(extra);
+  return qs.sort(()=>Math.random()-0.5);
+}
+
+/* ============ MOTEUR DE QUIZ ============ */
+let session=null; // {qs, idx, correct, xpGain, combo, isBilan, results:[], streakByDom:{}}
+function startSession(isBilan){
+  const qs = isBilan ? BILAN_IDS.map(i=>({q:BANK[i], i})) : buildSession();
+  session={qs, idx:0, correct:0, xpGain:0, combo:0, isBilan, results:[], perDom:[[0,0],[0,0],[0,0],[0,0]]};
+  show("scr-quiz");
+  renderQuestion();
+}
+function renderQuestion(){
+  const {qs, idx}=session;
+  const o=qs[idx], q=o.q, dom=DOMAINS[q.d];
+  $("qdots").innerHTML=qs.map((_,i)=>{
+    let cls="qdot";
+    if(i<idx) cls+= session.results[i] ? " done":" wrong";
+    else if(i===idx) cls+=" cur";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+  $("qtagwrap").innerHTML=`<span class="qtag" style="background:${dom.color}26;"><span>${dom.emoji}</span> <span style="color:${dom.color}">${dom.name} · niv. ${q.l}</span></span>`;
+  $("qtext").textContent=q.q;
+  // mélange des choix
+  const perm=q.c.map((_,i)=>i).sort(()=>Math.random()-0.5);
+  $("choices").innerHTML=perm.map(ci=>`<button class="choice" data-ci="${ci}">${q.c[ci]}</button>`).join("");
+  $("explainwrap").innerHTML="";
+  $("btn-next").style.display="none";
+  document.querySelectorAll(".choice").forEach(btn=>btn.addEventListener("click",()=>answer(parseInt(btn.dataset.ci),btn)));
+}
+function answer(ci, btn){
+  const {qs, idx}=session;
+  const o=qs[idx], q=o.q;
+  const ok = ci===q.a;
+  document.querySelectorAll(".choice").forEach(b=>{
+    b.disabled=true;
+    const bci=parseInt(b.dataset.ci);
+    if(bci===q.a) b.classList.add("correct");
+    else if(bci===ci) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  session.results.push(ok);
+  S.seen.add(o.i);
+  autoSave();
+  session.perDom[q.d][1]++;
+  if(ok){
+    session.correct++;
+    session.perDom[q.d][0]++;
+    session.combo++;
+    const comboBonus=Math.max(0,(session.combo-1)*3);
+    const gain = session.isBilan ? 8 : 10*q.l + comboBonus;
+    session.xpGain+=gain;
+  } else session.combo=0;
+  let v = ok ? `<div class="verdict ok">✓ Exact !</div>` : `<div class="verdict ko">✗ Raté — la bonne réponse : ${q.c[q.a]}</div>`;
+  let combo = (ok && session.combo>=2 && !session.isBilan) ? `<div class="combo">🔥 Combo ×${session.combo}</div>` : "";
+  $("explainwrap").innerHTML=`<div class="explain">${v}${q.e}${combo}</div>`;
+  $("btn-next").style.display="block";
+  $("btn-next").textContent = idx+1<qs.length ? "Continuer →" : (session.isBilan?"Voir mon profil →":"Voir mon score →");
+}
+function nextQ(){
+  session.idx++;
+  if(session.idx<session.qs.length) renderQuestion();
+  else session.isBilan ? finishBilan() : finishSession();
+}
+
+/* --- fin de session normale --- */
+function adjustLevels(){
+  const ups=[];
+  for(let d=0; d<4; d++){
+    const [ok,tot]=session.perDom[d];
+    if(!tot) continue;
+    if(ok===tot && S.lvl[d]<3){ S.lvl[d]++; ups.push(`${DOMAINS[d].emoji} <b>${DOMAINS[d].short}</b> passe au niveau ${S.lvl[d]} !`); }
+    else if(ok===0 && tot>=1 && S.lvl[d]>1){ S.lvl[d]--; }
+  }
+  return ups;
+}
+function finishSession(){
+  touchStreak();
+  const ups=adjustLevels();
+  const oldRank=rankOf(S.xp).cur[1];
+  S.xp+=session.xpGain;
+  const newRank=rankOf(S.xp).cur[1];
+  const sc=session.correct, tot=session.qs.length;
+  $("res-emoji").textContent = sc===tot?"🏆":sc>=4?"🎯":sc>=3?"👍":sc>=2?"💪":"🌱";
+  $("res-score").textContent=`${sc}/${tot}`;
+  $("res-xp").textContent=`+${session.xpGain} XP`;
+  $("res-streak").textContent=`🔥 Série : ${S.streak} jour${S.streak>1?"s":""}${newRank!==oldRank?` · 🎉 Nouveau rang : ${newRank} !`:""}`;
+  const lu=$("res-levelups");
+  if(ups.length){ lu.hidden=false; lu.innerHTML=`<h3>Progression</h3><p class="sub">${ups.join("<br>")}</p>`; }
+  else lu.hidden=true;
+  autoSave();
+  $("res-savetitle").textContent = CAN_STORE ? "💾 Sauvegarde automatique ✅" : "💾 Ton code de sauvegarde";
+  $("res-savenote").textContent = CAN_STORE
+    ? "Ta progression est enregistrée dans ce navigateur — rien à faire. Le code ci-dessous est une simple copie de secours."
+    : "Colle-le dans « Reprendre un code » à ta prochaine visite pour garder ta progression.";
+  $("res-code").textContent=encodeState();
+  show("scr-result");
+}
+
+/* --- fin de bilan --- */
+function finishBilan(){
+  touchStreak();
+  S.bilanDone=true;
+  // niveau de départ : score/domaine sur 3 → niveau 1..3
+  const labels=["en construction","solide","très solide"];
+  let html="", txt=[];
+  let best=-1, bestD=0, worst=4, worstD=0;
+  for(let d=0; d<4; d++){
+    const [ok,tot]=session.perDom[d];
+    S.lvl[d]= ok<=1 ? 1 : ok===2 ? 2 : 3;
+    const pct=tot?Math.round(ok/tot*100):0;
+    if(ok>best){best=ok;bestD=d;} if(ok<worst){worst=ok;worstD=d;}
+    html+=`<div class="domrow"><span class="domdot" style="background:${DOMAINS[d].color}"></span><span class="domname">${DOMAINS[d].short}</span><div class="dombar"><div style="width:${pct}%;background:${DOMAINS[d].color}"></div></div><span class="domlvl">${ok}/${tot}</span></div>`;
+  }
+  $("bilanbars").innerHTML=html;
+  $("bilantext").innerHTML=`Ton point fort du jour : <b>${DOMAINS[bestD].name}</b> ${DOMAINS[bestD].emoji}. Ta plus grande marge de progression : <b>${DOMAINS[worstD].name}</b> — les sessions t'en proposeront un peu plus pour muscler ce domaine. La difficulté de chaque domaine est maintenant calée sur ton niveau.`;
+  S.xp+=session.xpGain;
+  autoSave();
+  show("scr-bilan");
+}
+
+/* ============ RENDU ACCUEIL ============ */
+function renderHome(){
+  const {cur,next}=rankOf(S.xp);
+  $("rankname").textContent=cur[1];
+  $("xpnum").textContent=S.xp+" XP";
+  if(next){
+    const span=next[0]-cur[0];
+    $("xpfill").style.width=Math.round((S.xp-cur[0])/span*100)+"%";
+    $("xpnext").textContent=`Encore ${next[0]-S.xp} XP avant le rang « ${next[1]} »`;
+  } else { $("xpfill").style.width="100%"; $("xpnext").textContent="Rang maximum atteint. Chapeau bas."; }
+  $("streakval").textContent=S.streak;
+  $("domlist").innerHTML=DOMAINS.map((dom,d)=>{
+    const pct=Math.round(S.lvl[d]/3*100);
+    return `<div class="domrow"><span class="domdot" style="background:${dom.color}"></span><span class="domname">${dom.emoji} ${dom.short}</span><div class="dombar"><div style="width:${pct}%;background:${dom.color}"></div></div><span class="domlvl">niv. ${S.lvl[d]}/3</span></div>`;
+  }).join("");
+  const played = S.lastDay===todayStr();
+  $("dailymsg").innerHTML = played
+    ? "✅ Session du jour faite — ta série est en sécurité. Une de plus ?"
+    : (S.streak>0 ? `⏳ Joue aujourd'hui pour prolonger ta série de <b>${S.streak} jour${S.streak>1?"s":""}</b> !` : "⚡ 5 questions, ~4 minutes. C'est maintenant.");
+  show("scr-home");
+}
+
+/* ============ NAVIGATION ============ */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
+function copyText(txt, btn){
+  const done=()=>{ const t=btn.textContent; btn.textContent="✓ Copié !"; setTimeout(()=>btn.textContent=t,1600); };
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); }
+  else fallbackCopy(txt,done);
+}
+function fallbackCopy(txt,done){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");}catch(e){} document.body.removeChild(ta); done(); }
+
+/* ============ INIT & LISTENERS ============ */
+function init(){
+  S=freshState();
+  $("btn-bilan").addEventListener("click",()=>startSession(true));
+  $("btn-start").addEventListener("click",()=>startSession(false));
+  $("btn-again").addEventListener("click",()=>startSession(false));
+  $("btn-next").addEventListener("click",nextQ);
+  $("btn-quit").addEventListener("click",()=>{ if(confirm("Quitter la session en cours ?")) renderHome(); });
+  $("btn-home").addEventListener("click",renderHome);
+  $("btn-bilan-done").addEventListener("click",renderHome);
+  $("btn-rebilan").addEventListener("click",()=>{ if(confirm("Refaire le bilan recalera tes niveaux de départ. OK ?")) startSession(true); });
+  $("btn-load").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; show("scr-load"); });
+  $("btn-load2").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; show("scr-load"); });
+  $("btn-loadback").addEventListener("click",()=>{ S.bilanDone ? renderHome() : show("scr-welcome"); });
+  $("btn-loadgo").addEventListener("click",()=>{
+    const st=decodeState($("loadinput").value);
+    if(!st){ $("loaderr").style.display="block"; return; }
+    S=st; autoSave(); renderHome();
+  });
+  $("btn-save").addEventListener("click",()=>{
+    $("save-code").textContent=encodeState();
+    $("save-note").textContent = CAN_STORE
+      ? "✅ Sauvegarde automatique active dans ce navigateur : ta progression est enregistrée toute seule. Ce code n'est qu'une copie de secours (changement de téléphone, etc.)."
+      : "⚠️ Ce navigateur ne permet pas la sauvegarde automatique : garde ce code dans tes notes, c'est ta mémoire.";
+    show("scr-save");
+  });
+  $("btn-saveback").addEventListener("click",renderHome);
+  $("btn-copy").addEventListener("click",e=>copyText($("res-code").textContent,e.target));
+  $("btn-copy2").addEventListener("click",e=>copyText($("save-code").textContent,e.target));
+  $("btn-update").addEventListener("click",()=>{ $("upd-code").textContent=encodeState(); show("scr-update"); });
+  $("btn-copy3").addEventListener("click",e=>copyText($("upd-code").textContent,e.target));
+  $("btn-updback").addEventListener("click",renderHome);
+  /* Restauration : 1) sauvegarde auto du navigateur, 2) progression préchargée, 3) accueil */
+  let restored = null;
+  const stored = storeGet();
+  if(stored) restored = decodeState(stored);
+  if(!restored && PRELOADED) restored = decodeState(PRELOADED);
+  if(restored){ S = restored; autoSave(); renderHome(); }
+  else show("scr-welcome");
+}
+document.addEventListener("DOMContentLoaded",init);
+</script>
+</body>
+</html>
