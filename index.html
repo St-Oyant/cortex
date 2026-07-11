@@ -124,6 +124,31 @@
   .err{color:var(--bad); font-size:13px; margin-top:8px; display:none;}
 
   .footerlinks{display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; margin-top:16px;}
+
+  /* ===== LE FLUX ===== */
+  #scr-flux{padding:0;}
+  #scr-flux.active{display:flex; position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:100dvh; overflow:hidden; background:var(--page); z-index:20;}
+  .fluxbar{display:flex; align-items:center; gap:12px; padding:14px 18px 10px; flex:none; background:var(--page); z-index:5;}
+  .fluxbar .fluxtitle{font-size:17px; font-weight:700; flex:1;}
+  #fluxscroll{flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y proximity; -webkit-overflow-scrolling:touch; padding:0 16px 40px;}
+  .fcard{scroll-snap-align:start; min-height:78vh; display:flex; flex-direction:column; justify-content:center; padding:22px 4px; animation:fadein .3s ease;}
+  .fcard .ftag{align-self:flex-start; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:5px 11px; border-radius:999px; margin-bottom:16px;}
+  .fcard .fbody{font-size:22px; line-height:1.5; font-weight:600;}
+  .fcard .fbody b{color:#fff;}
+  .fcard .fsrc{font-size:13px; color:var(--muted); margin-top:16px;}
+  .fcard.quote .fbody{font-size:24px; font-style:italic; font-weight:600; line-height:1.55;}
+  .fcard.quote .fauthor{font-size:15px; color:var(--ink2); margin-top:16px; font-weight:600;}
+  .fquiz .fq{font-size:21px; line-height:1.45; font-weight:600; margin-bottom:18px;}
+  .fchoice{width:100%; text-align:left; padding:13px 15px; margin-bottom:9px; background:var(--surface); border:1px solid var(--hairline); border-radius:13px; color:var(--ink); font-size:16px; line-height:1.3;}
+  .fchoice:active{border-color:var(--muted);}
+  .fchoice.correct{border-color:var(--good); background:rgba(12,163,12,.10);}
+  .fchoice.wrong{border-color:var(--bad); background:rgba(208,59,59,.10);}
+  .fchoice.dim{opacity:.4;}
+  .fchoice:disabled{cursor:default;}
+  .fexpl{background:var(--surface2); border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.5; color:var(--ink2); margin-top:6px; animation:fadein .3s ease;}
+  .fexpl b{color:#fff;}
+  .fhint{text-align:center; color:var(--muted); font-size:13px; padding:10px 0 4px; animation:fadein .4s;}
+  .fchip{align-self:flex-start; font-size:34px; margin-bottom:6px;}
   .footerlinks button{background:none; color:var(--muted); font-size:13px; text-decoration:underline; text-underline-offset:3px;}
 
   /* bilan résultat : barres par domaine */
@@ -158,6 +183,7 @@
     </div>
 
     <button class="btn" id="btn-start">⚡ Session éclair · 5 questions</button>
+    <button class="btn secondary" id="btn-flux" style="margin-top:10px;">🌊 Le Flux · picore sans fin</button>
     <div class="footerlinks">
       <button id="btn-save">Sauvegarder</button>
       <button id="btn-load">Reprendre un code</button>
@@ -166,10 +192,20 @@
     </div>
   </section>
 
+  <!-- LE FLUX -->
+  <section class="screen" id="scr-flux">
+    <div class="fluxbar">
+      <button class="quit" id="btn-fluxquit">×</button>
+      <span class="fluxtitle">🌊 Le Flux</span>
+      <span class="pill" style="padding:4px 10px;">+<b id="fluxxp">0</b> XP</span>
+    </div>
+    <div id="fluxscroll"></div>
+  </section>
+
   <!-- MISE À NIVEAU -->
   <section class="screen" id="scr-update">
     <h1>Mise à niveau</h1>
-    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v1.3</b> · 175 questions</p>
+    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v2.0</b> · 212 questions + Le Flux</p>
     <div class="card" style="margin-top:18px;">
       <h3>Comment recharger l'app</h3>
       <p class="sub">1️⃣ Copie ton code de progression ci-dessous.<br><br>2️⃣ Envoie-le à Claude avec « <b>Recharge Cortex</b> » : tu recevras un nouvel <b>index.html</b> avec du contenu frais.<br><br>3️⃣ Téléverse-le sur ton dépôt GitHub (Add file → Upload files : il remplace l'ancien). Quelques minutes plus tard, l'app installée se met à jour toute seule — ta progression, elle, reste dans le téléphone.</p>
@@ -274,6 +310,9 @@ const DOMAINS = [
   {name:"Logique & déduction", short:"Logique", color:"#199e70", emoji:"🧩"},
   {name:"PLM & consulting", short:"PLM", color:"#9085e9", emoji:"⚙️"},
   {name:"Esprit critique", short:"Critique", color:"#c98500", emoji:"🔍"},
+  {name:"Sciences & tech", short:"Sciences", color:"#e66767", emoji:"🔬"},
+  {name:"Éco & business", short:"Éco", color:"#d95926", emoji:"📈"},
+  {name:"Anglais pro", short:"Anglais", color:"#d55181", emoji:"🗣️"},
 ];
 const RANKS = [
   [0,"Curieux"],[150,"Apprenti"],[400,"Éclairé"],[800,"Analyste"],
@@ -464,12 +503,104 @@ const BANK = [
 {d:3,l:3,q:"« Prouve-moi que ça n'existe pas, sinon c'est que ça existe. » Quel est le vice de raisonnement ?",c:["Le renversement de la charge de la preuve","L'argument d'autorité","La pente glissante","Le sophisme génétique"],a:0,e:"La <b>charge de la preuve</b> incombe à celui qui <b>affirme</b>. On ne peut pas prouver l'inexistence de la théière céleste de Russell — c'est pourquoi l'absence de preuve suffit à ne pas y croire, sans avoir rien à démontrer."},
 {d:3,l:3,q:"« Si on autorise ça, alors demain tout sera permis. » Sans démonstration de l'enchaînement, c'est…",c:["Un raisonnement par récurrence","Le sophisme de la pente glissante","Une preuve par l'absurde","Un argument bayésien"],a:1,e:"La <b>pente glissante</b> : affirmer qu'un premier pas entraînera fatalement une cascade de conséquences, <b>sans démontrer aucun maillon</b>. La question à poser : « quel mécanisme précis rend l'étape suivante inévitable ? » Parfois il existe — alors ce n'est plus un sophisme, c'est un argument."},
 {d:3,l:3,q:"Multiplier les analyses statistiques jusqu'à trouver un résultat « significatif », c'est…",c:["De la rigueur scientifique","Le p-hacking","Une méta-analyse","Le rasoir d'Ockham"],a:1,e:"Le <b>p-hacking</b> : à force de tester 20 hypothèses, une ressortira « significative » par pur hasard (au seuil de 5 %, c'est mathématique). D'où l'importance du <b>pré-enregistrement</b> des études. Réflexe : demander combien d'analyses ont été tentées, pas seulement celle qui est publiée."},
+/* ===== v2.0 — SCIENCES & TECH (d:4) ===== */
+{d:4,l:1,q:"Quelle est la plus grande planète du système solaire ?",c:["Saturne","Jupiter","Neptune","Uranus"],a:1,e:"<b>Jupiter</b> : 1 300 fois le volume de la Terre. Sa masse dépasse celle de toutes les autres planètes réunies — elle sert de « bouclier gravitationnel » en déviant nombre de comètes."},
+{d:4,l:1,q:"Quel gaz compose principalement l'air que nous respirons ?",c:["L'oxygène","Le dioxyde de carbone","L'azote","L'hydrogène"],a:2,e:"L'<b>azote</b> (78 %) ! L'oxygène ne représente que 21 %. Notre corps inspire donc surtout un gaz… qu'il n'utilise pas directement."},
+{d:4,l:1,q:"Pourquoi voit-on l'éclair avant d'entendre le tonnerre ?",c:["L'œil réagit plus vite que l'oreille","La lumière voyage bien plus vite que le son","Le tonnerre part après l'éclair","C'est une illusion"],a:1,e:"La <b>lumière</b> (300 000 km/s) écrase le <b>son</b> (340 m/s). Astuce : compte les secondes entre éclair et tonnerre, divise par 3 → distance de l'orage en km."},
+{d:4,l:1,q:"Combien d'os compte le squelette humain adulte ?",c:["106","206","306","156"],a:1,e:"<b>206</b> — mais un bébé en a environ 300 : beaucoup fusionnent en grandissant. Plus de la moitié se trouvent… dans les mains et les pieds."},
+{d:4,l:1,q:"Le Wi-Fi transmet les données par…",c:["Des ondes radio","Des ultrasons","De la lumière infrarouge","Des micro-câbles"],a:0,e:"Des <b>ondes radio</b> (2,4 et 5 GHz principalement). Fait amusant : la technologie clé du Wi-Fi doit beaucoup à des travaux de radioastronomie australiens des années 90."},
+{d:4,l:2,q:"Comment fonctionne un vaccin à ARN messager ?",c:["Il injecte le virus affaibli","Il donne à nos cellules la « recette » d'une protéine du virus pour entraîner l'immunité","Il modifie notre ADN","Il contient des anticorps prêts à l'emploi"],a:1,e:"L'<b>ARNm</b> est un plan de fabrication temporaire : nos cellules produisent une protéine du virus (inoffensive seule), le système immunitaire apprend à la reconnaître, puis l'ARNm se dégrade en quelques heures. Il n'entre jamais dans le noyau — donc ne touche pas l'ADN."},
+{d:4,l:2,q:"Un octet, c'est…",c:["8 bits","1 000 bits","Un caractère chinois","4 bits"],a:0,e:"<b>8 bits</b> — 256 valeurs possibles, de quoi coder un caractère latin. Ton téléphone en gère des centaines de milliards. En anglais : byte (d'où Go = gigabyte)."},
+{d:4,l:2,q:"Une blockchain est essentiellement…",c:["Une monnaie électronique","Un registre distribué et quasi infalsifiable, sans autorité centrale","Un antivirus","Un langage de programmation"],a:1,e:"Un <b>registre distribué</b> : des milliers de copies synchronisées, où chaque bloc scelle cryptographiquement le précédent — falsifier une écriture exigerait de réécrire toute la chaîne partout à la fois. Le Bitcoin n'en est qu'une application."},
+{d:4,l:2,q:"La sirène d'une ambulance change de son quand elle passe devant toi. C'est…",c:["L'effet Doppler","La réverbération","L'effet Larsen","L'atténuation"],a:0,e:"L'<b>effet Doppler</b> : les ondes se compriment à l'approche (son plus aigu) et s'étirent à l'éloignement (plus grave). C'est le même effet qui, appliqué à la lumière des galaxies, a révélé l'expansion de l'univers."},
+{d:4,l:2,q:"Pourquoi les antibiotiques sont-ils inutiles contre la grippe ?",c:["La grippe est trop contagieuse","Les antibiotiques ciblent les bactéries, or la grippe est un virus","Ils sont trop faibles","La grippe mute trop vite"],a:1,e:"Les antibiotiques attaquent des mécanismes propres aux <b>bactéries</b> (paroi, ribosomes…). Un <b>virus</b> n'en a pas : il détourne nos propres cellules. Les prescrire « au cas où » nourrit l'antibiorésistance — l'une des grandes menaces sanitaires du siècle."},
+{d:4,l:3,q:"Quelle est la différence fondamentale entre le machine learning et un programme classique ?",c:["Il est écrit en Python","Il apprend des règles à partir d'exemples au lieu d'appliquer des règles codées à la main","Il est plus rapide","Il n'a pas besoin d'ordinateur"],a:1,e:"Programme classique : des <b>règles</b> écrites par un humain produisent des réponses. Machine learning : on fournit des <b>exemples</b> (données + réponses) et la machine infère les règles. Conséquence pratique : sa qualité dépend d'abord… de la qualité des données."},
+{d:4,l:3,q:"Qu'est-ce qui distingue un qubit d'un bit classique ?",c:["Il est plus petit","Il peut être en superposition de 0 et 1 à la fois","Il stocke 8 valeurs","Il fonctionne sans électricité"],a:1,e:"La <b>superposition</b> : un qubit explore des combinaisons de 0 et 1 simultanément, et l'<b>intrication</b> lie les qubits entre eux. Résultat : certains calculs deviennent exponentiellement plus rapides — d'où la course mondiale au calcul quantique (et la menace sur la cryptographie actuelle)."},
+{d:4,l:3,q:"CRISPR-Cas9 est souvent décrit comme…",c:["Un télescope spatial","Des « ciseaux moléculaires » pour éditer l'ADN avec précision","Un vaccin universel","Un supercalculateur"],a:1,e:"Des <b>ciseaux moléculaires</b> guidés par une séquence ARN : on coupe l'ADN à l'endroit exact voulu, pour désactiver ou corriger un gène. Issu… du système immunitaire des bactéries. Nobel de chimie 2020 pour Charpentier et Doudna — révolution médicale, et débats éthiques à la clé."},
+/* ===== v2.0 — ÉCO & BUSINESS (d:5) ===== */
+{d:5,l:1,q:"Que signifie « B2B » ?",c:["Back to Basics","Business to Business","Buy to Build","Brand to Buyer"],a:1,e:"<b>Business to Business</b> : une entreprise qui vend à d'autres entreprises (vs B2C, vers le grand public). Le PLM, par exemple, est un marché typiquement B2B."},
+{d:5,l:1,q:"Quelle est la différence entre chiffre d'affaires et bénéfice ?",c:["Aucune, ce sont des synonymes","Le CA est le total des ventes ; le bénéfice est ce qui reste une fois les coûts déduits","Le bénéfice est toujours plus grand","Le CA inclut les impôts, pas le bénéfice"],a:1,e:"Le <b>chiffre d'affaires</b> est le total des ventes ; le <b>bénéfice</b> est ce qui reste après avoir payé tous les coûts. Une entreprise peut faire un gros CA et perdre de l'argent — confusion classique."},
+{d:5,l:1,q:"Qu'est-ce qu'une action, en Bourse ?",c:["Un prêt à l'entreprise","Une part de propriété de l'entreprise","Une garantie de l'État","Un bon de réduction"],a:1,e:"Une <b>part de propriété</b> : l'actionnaire touche des dividendes et vote en assemblée. L'obligation, elle, est un <b>prêt</b> remboursé avec intérêts — on est créancier, pas propriétaire."},
+{d:5,l:1,q:"Que veut dire « ROI » dans le jargon business ?",c:["Rate Of Inflation","Return On Investment (retour sur investissement)","Risk Of Insolvency","Revenue Over Income"],a:1,e:"<b>Return On Investment</b> : ce que rapporte un investissement rapporté à son coût. Argument central de toute mission de conseil — et le plus dur à chiffrer de façon crédible."},
+{d:5,l:2,q:"Que décrit la loi de l'offre et de la demande ?",c:["Les prix baissent toujours","Le prix s'équilibre là où quantités offerte et demandée se rencontrent","L'État fixe les prix","La demande crée l'offre"],a:1,e:"Le <b>prix d'équilibre</b> se forme au point de rencontre entre ce que les vendeurs offrent et ce que les acheteurs demandent. Rareté + forte demande = le prix monte."},
+{d:5,l:2,q:"Qu'est-ce qu'une économie d'échelle ?",c:["La baisse du coût unitaire quand on produit en plus grande quantité","La hausse des prix avec l'inflation","Une réduction d'impôt","La diversification des produits"],a:0,e:"Produire <b>plus</b> fait baisser le coût <b>par unité</b> (les coûts fixes se répartissent, les achats se négocient mieux). Moteur de la compétitivité des grands groupes — et argument classique de fusion."},
+{d:5,l:2,q:"Dans une analyse SWOT, que signifient les 4 lettres ?",c:["Sales, Work, Output, Time","Strengths, Weaknesses, Opportunities, Threats","Strategy, Wins, Objectives, Tactics","Scope, Workload, Outcome, Target"],a:1,e:"<b>Forces, Faiblesses, Opportunités, Menaces</b> : forces/faiblesses sont internes, opportunités/menaces externes. L'outil de diagnostic stratégique le plus universel."},
+{d:5,l:2,q:"Qu'est-ce que le « churn » (attrition) ?",c:["Le taux de croissance","Le taux de clients perdus sur une période","La rotation des stocks","La marge nette"],a:1,e:"Le <b>taux de clients qui partent</b> sur une période. Métrique vitale des modèles par abonnement (SaaS, télécoms) : garder un client coûte bien moins cher que d'en conquérir un nouveau."},
+{d:5,l:3,q:"Que sont les « 5 forces de Porter » ?",c:["Un modèle de motivation d'équipe","Un cadre d'analyse de l'intensité concurrentielle d'un secteur","Les 5 phases d'un projet","Une méthode de fixation des prix"],a:1,e:"Concurrents, <b>nouveaux entrants, fournisseurs, clients et substituts</b> : le cadre de Michael Porter pour juger l'attractivité d'un secteur. Plus les forces sont fortes, plus les profits sont sous pression."},
+{d:5,l:3,q:"Qu'est-ce que la « disruption » au sens de Christensen ?",c:["Une panne technique","Une innovation qui part souvent du bas de gamme puis détrône les leaders","Une grève","Un krach boursier"],a:1,e:"Une innovation qui s'installe sur un segment négligé, puis <b>remonte</b> et renverse les acteurs établis (Netflix vs Blockbuster). Paradoxe : les leaders sont vulnérables <i>parce qu'</i>ils écoutent trop leurs bons clients actuels."},
+{d:5,l:3,q:"Pourquoi une entreprise rentable peut-elle faire faillite ?",c:["C'est impossible","Par manque de trésorerie : elle est rentable sur le papier mais n'a pas le cash pour payer à temps","À cause des impôts uniquement","Parce que ses actions baissent"],a:1,e:"La <b>trésorerie tue plus que les pertes</b> : si les clients paient à 90 jours mais qu'il faut payer salaires et fournisseurs avant, l'entreprise peut être en cessation de paiement tout en étant bénéficiaire. D'où l'importance du fonds de roulement."},
+{d:5,l:3,q:"Que décrit la « longue traîne » (long tail) ?",c:["Une chaîne logistique étendue","Le fait que la somme des ventes de niche peut rivaliser avec celle des best-sellers","Un délai de paiement long","Un produit lent à sortir"],a:1,e:"Sur internet, où stocker coûte quasi rien, la <b>multitude de produits de niche</b> peut générer autant de revenus que les quelques blockbusters. Le modèle d'Amazon, Spotify ou Netflix."},
+/* ===== v2.0 — ANGLAIS PRO (d:6) ===== */
+{d:6,l:1,q:"Que signifie « deadline » ?",c:["Une ligne rouge","Une date limite","Une réunion","Un objectif chiffré"],a:1,e:"Une <b>date limite</b>. Origine glaçante : dans les prisons de la guerre de Sécession, la « dead line » était la ligne au-delà de laquelle un prisonnier était abattu."},
+{d:6,l:1,q:"Que veut dire « stakeholder » ?",c:["Un actionnaire seulement","Une partie prenante (toute personne concernée par un projet)","Un chef de projet","Un investisseur externe"],a:1,e:"Une <b>partie prenante</b> : quiconque est concerné par un projet (clients, employés, direction…). À ne pas confondre avec <i>shareholder</i>, qui désigne l'actionnaire au sens strict."},
+{d:6,l:1,q:"« ASAP » signifie…",c:["As Simple As Possible","As Soon As Possible","After Sales And Payment","Always Send A Proposal"],a:1,e:"<b>As Soon As Possible</b> — « dès que possible ». L'un des acronymes les plus courants des emails pro anglophones."},
+{d:6,l:1,q:"En réunion, « let's touch base » veut dire…",c:["Recommençons à zéro","Faisons un point rapide ensemble","Changeons de sujet","Terminons"],a:1,e:"<b>Faire un point</b>, reprendre contact brièvement (expression de baseball). « Let's touch base next week » = « refaisons un point la semaine prochaine »."},
+{d:6,l:2,q:"« To be on the same page » signifie…",c:["Lire le même document","Être d'accord, partager la même compréhension","Faire la même tâche","Être en retard ensemble"],a:1,e:"<b>Être sur la même longueur d'onde</b>. « Let's make sure we're on the same page » = « assurons-nous qu'on est bien d'accord »."},
+{d:6,l:2,q:"Un « ballpark figure », c'est…",c:["Un chiffre précis validé","Une estimation approximative, un ordre de grandeur","Le budget maximal","Un chiffre confidentiel"],a:1,e:"Une <b>estimation grossière</b>. « Give me a ballpark figure » = « donne-moi une fourchette approximative ». Encore une métaphore de baseball !"},
+{d:6,l:2,q:"« To leverage our expertise » veut dire…",c:["Cacher notre expertise","Tirer parti de / exploiter notre expertise","Vendre notre expertise","Réduire notre expertise"],a:1,e:"<b>Tirer parti de</b>, exploiter comme un levier. Omniprésent dans le jargon corporate : « we'll leverage the existing data » = « on va s'appuyer sur les données existantes »."},
+{d:6,l:2,q:"« The report is due Monday. » Que signifie « due » ?",c:["Annulé","Attendu / à rendre pour","Optionnel","En retard"],a:1,e:"<b>Attendu / exigible pour</b> cette date. « Due » exprime l'échéance : « the deliverable is due next Friday » = « le livrable est à rendre vendredi prochain »."},
+{d:6,l:3,q:"« Let's not boil the ocean. » conseille de…",c:["Ne pas gaspiller d'énergie","Ne pas se fixer une tâche trop vaste et irréaliste","Ne pas travailler dans l'urgence","Ne pas prendre de risque"],a:1,e:"<b>Ne pas tout vouloir résoudre d'un coup</b> — « faire bouillir l'océan » est impossible. En conseil : recentrer sur un périmètre atteignable."},
+{d:6,l:3,q:"Un projet « in the weeds », c'est un projet où l'on…",c:["Prend du recul stratégique","Est enlisé dans les détails","Avance très vite","Manque de budget"],a:1,e:"<b>Enlisé dans les détails</b> (littéralement « dans les herbes hautes »). « We're getting into the weeds » = « on se perd dans les détails », au détriment de la vue d'ensemble."},
+{d:6,l:3,q:"« That's a low-hanging fruit. » désigne…",c:["Une tâche sans valeur","Un gain facile et rapide à obtenir","Un problème insoluble","Une décision risquée"],a:1,e:"Un <b>gain facile</b>, « à portée de main » — le fruit sur la branche basse. Équivalent du « quick win ». « Let's start with the low-hanging fruit »."},
+{d:6,l:3,q:"« Can you circle back on this? » demande de…",c:["Résumer","Revenir sur ce point plus tard","Voter","Faire un schéma"],a:1,e:"<b>Revenir sur ce sujet ultérieurement</b>. « Let's circle back after lunch » = « on y revient après le déjeuner ». Parfois une façon polie d'enterrer un sujet !"},
 ];
 /* Bilan initial : les 12 questions marquées bi:1 (3 par domaine, difficultés 1-2-3) */
 const BILAN_IDS = BANK.map((q,i)=>q.bi?i:-1).filter(i=>i>=0);
 
+/* ============ CONTENU DU FLUX ============ */
+/* Faits étonnants : {t:emoji d'ambiance, x:texte HTML, s:source/précision} */
+const FACTS = [
+  {c:"🐙",x:"Un <b>poulpe</b> possède trois cœurs et neuf cerveaux : un central, plus un mini-cerveau dans chacun de ses huit bras, qui peut agir presque en autonomie.",s:"Deux cœurs pompent vers les branchies, le troisième vers le corps."},
+  {c:"🍯",x:"Le <b>miel</b> ne périme jamais. On a retrouvé dans des tombeaux égyptiens des pots vieux de 3 000 ans encore parfaitement comestibles.",s:"Son acidité et sa faible teneur en eau empêchent toute bactérie de s'y développer."},
+  {c:"🌕",x:"Chaque année, la <b>Lune</b> s'éloigne de la Terre d'environ 3,8 cm — à peu près la vitesse à laquelle poussent tes ongles.",s:"Dans un lointain futur, les éclipses totales de Soleil deviendront impossibles."},
+  {c:"🧠",x:"Ton <b>cerveau</b> consomme environ 20 % de ton énergie au repos, alors qu'il ne pèse que 2 % de ton corps.",s:"D'où l'intérêt de bien le nourrir… et de bien dormir."},
+  {c:"🦈",x:"Les <b>requins</b> existaient déjà avant les arbres. Ils peuplent les océans depuis ~450 millions d'années ; les premiers arbres datent de ~350 millions d'années.",s:"Ils ont aussi survécu à cinq extinctions de masse."},
+  {c:"⚡",x:"Un <b>éclair</b> est environ cinq fois plus chaud que la surface du Soleil : jusqu'à 30 000 °C contre ~5 500 °C.",s:"C'est cette chaleur brutale qui dilate l'air et provoque le tonnerre."},
+  {c:"🐜",x:"La masse totale de toutes les <b>fourmis</b> sur Terre est comparable à celle de l'ensemble des humains.",s:"On estime leur nombre à ~20 millions de milliards."},
+  {c:"🌍",x:"Il y a plus d'<b>arbres</b> sur Terre (~3 000 milliards) que d'<b>étoiles</b> dans la Voie lactée (~100 à 400 milliards).",s:"Mais l'humanité en a fait disparaître près de la moitié depuis le début de l'agriculture."},
+  {c:"🕰️",x:"Cléopâtre a vécu plus près de la construction du <b>premier iPhone</b> (2007) que de la construction de la <b>grande pyramide de Gizeh</b>.",s:"La pyramide date de ~2560 av. J.-C., Cléopâtre de ~30 av. J.-C."},
+  {c:"🦑",x:"Le <b>calmar géant</b> a les plus grands yeux du règne animal : jusqu'à 27 cm de diamètre, la taille d'un ballon de basket.",s:"Utiles pour détecter la bioluminescence des prédateurs dans les abysses."},
+  {c:"💧",x:"L'<b>eau chaude</b> peut geler plus vite que l'eau froide dans certaines conditions : c'est l'effet Mpemba, encore mal expliqué.",s:"Observé dès Aristote, redécouvert par un lycéen tanzanien en 1963."},
+  {c:"🧬",x:"Tu partages environ <b>60 % de tes gènes avec une banane</b> — simplement parce que la vie sur Terre a une chimie commune.",s:"~99 % avec un chimpanzé, ~50 % avec une mouche du vinaigre."},
+  {c:"📡",x:"Les signaux radio des <b>premières émissions TV</b> voyagent dans l'espace depuis ~80 ans. Ils forment une bulle de ~160 années-lumière de diamètre autour de la Terre.",s:"Infime à l'échelle de la galaxie (100 000 années-lumière)."},
+  {c:"🐢",x:"Certaines <b>tortues</b> respirent (en partie) par le derrière. En hibernation sous l'eau, elles absorbent l'oxygène via leur cloaque.",s:"Cela leur permet de rester immergées tout l'hiver."},
+  {c:"🌡️",x:"Le <b>zéro absolu</b> (−273,15 °C) est une limite qu'on ne peut jamais atteindre totalement : il faudrait une infinité d'énergie pour retirer la toute dernière chaleur.",s:"On s'en est approché à quelques milliardièmes de degré en laboratoire."},
+  {c:"👑",x:"La <b>guerre la plus courte</b> de l'histoire a duré environ 38 minutes : le conflit anglo-zanzibarite de 1896.",s:"Le sultan de Zanzibar capitula avant la première heure."},
+  {c:"🍫",x:"Le <b>chocolat</b> a longtemps été une boisson… salée et pimentée. Les Aztèques le consommaient amer, parfois avec du piment, jamais sucré.",s:"Le sucre n'y fut ajouté qu'après son arrivée en Europe."},
+  {c:"🧊",x:"L'<b>Antarctique</b> est techniquement un désert : il y tombe très peu de précipitations, moins que dans le Sahara par endroits.",s:"Un désert se définit par l'aridité, pas par la chaleur."},
+  {c:"🎵",x:"Écouter de la <b>musique</b> libère de la dopamine — la même molécule impliquée dans le plaisir de manger ou… de scroller.",s:"D'où l'idée de rediriger ce circuit vers des habitudes qui te nourrissent."},
+  {c:"🐝",x:"Les <b>abeilles</b> peuvent reconnaître des visages humains et comprennent le concept de zéro — une abstraction que peu d'animaux maîtrisent.",s:"Leur cerveau ne compte pourtant qu'un million de neurones."},
+  {c:"🌋",x:"Il y a plus de <b>volcans actifs</b> sous les océans qu'à la surface. La plus longue chaîne de montagnes de la planète, la dorsale médio-océanique, est presque entièrement immergée.",s:"~65 000 km de long, contre 7 000 km pour les Andes."},
+  {c:"🧫",x:"Tu abrites autant de <b>cellules bactériennes</b> que de cellules humaines. Ton microbiote pèse environ 1 à 2 kg.",s:"Il influence digestion, immunité et même humeur."},
+  {c:"📏",x:"Si tu déroulais l'<b>ADN</b> de toutes les cellules de ton corps, il s'étirerait sur environ deux fois le diamètre du système solaire.",s:"Chaque cellule contient ~2 mètres d'ADN, et tu en as des dizaines de milliers de milliards."},
+  {c:"🦴",x:"L'os humain est, à poids égal, <b>plus résistant que l'acier</b> en compression — tout en étant bien plus léger.",s:"Sa structure alvéolaire optimise force et légèreté."},
+  {c:"🌠",x:"La <b>lumière du Soleil</b> que tu vois a quitté son cœur il y a des dizaines de milliers d'années : l'énergie met très longtemps à remonter jusqu'à la surface, puis 8 minutes pour t'atteindre.",s:"Le trajet interne est un lent cheminement de proche en proche."},
+  {c:"🐕",x:"Le <b>museau d'un chien</b> est aussi unique que nos empreintes digitales. Certains pays l'acceptent comme moyen d'identification.",s:"Leur odorat est aussi 10 000 à 100 000 fois plus fin que le nôtre."},
+];
+/* Citations à méditer */
+const QUOTES = [
+  {q:"Ce n'est pas parce que les choses sont difficiles que nous n'osons pas, c'est parce que nous n'osons pas qu'elles sont difficiles.",a:"Sénèque"},
+  {q:"Je pense, donc je suis.",a:"René Descartes"},
+  {q:"La culture, c'est ce qui reste quand on a tout oublié.",a:"Édouard Herriot"},
+  {q:"Ce que nous savons est une goutte d'eau ; ce que nous ignorons est un océan.",a:"Isaac Newton"},
+  {q:"L'important n'est pas de convaincre, mais de donner à réfléchir.",a:"Bernard Werber"},
+  {q:"Il n'y a pas de vent favorable pour celui qui ne sait où il va.",a:"Sénèque"},
+  {q:"La logique vous mènera d'un point A à un point B. L'imagination vous mènera partout.",a:"Albert Einstein"},
+  {q:"Connais-toi toi-même.",a:"Inscription du temple de Delphes"},
+  {q:"Le doute est le commencement de la sagesse.",a:"Aristote"},
+  {q:"Un investissement dans le savoir paie toujours les meilleurs intérêts.",a:"Benjamin Franklin"},
+  {q:"Ce n'est pas la force, mais la persévérance, qui fait les grandes œuvres.",a:"Samuel Johnson"},
+  {q:"Vivre, c'est apprendre à mourir ; penser, c'est apprendre à vivre.",a:"Montaigne (adapté)"},
+  {q:"La simplicité est la sophistication suprême.",a:"attribuée à Léonard de Vinci"},
+  {q:"On ne voit bien qu'avec le cœur. L'essentiel est invisible pour les yeux.",a:"Antoine de Saint-Exupéry"},
+  {q:"Le vrai voyage de découverte ne consiste pas à chercher de nouveaux paysages, mais à avoir de nouveaux yeux.",a:"Marcel Proust"},
+  {q:"Celui qui déplace une montagne commence par déplacer de petites pierres.",a:"Confucius"},
+  {q:"Nous sommes ce que nous faisons de façon répétée. L'excellence n'est donc pas un acte, mais une habitude.",a:"Will Durant (résumant Aristote)"},
+  {q:"La chance ne sourit qu'aux esprits bien préparés.",a:"Louis Pasteur"},
+];
+
 /* ============ ÉTAT ============ */
-const APP_VERSION = "1.3";
+const APP_VERSION = "2.0";
 /* PWA : service worker pour l'installation et le mode hors-ligne */
 try {
   if ("serviceWorker" in navigator && location.protocol === "https:") {
@@ -492,7 +623,7 @@ let S = null; // {xp, streak, lastDay, lvl:[4], seen:Set, bilanDone}
 const $ = id => document.getElementById(id);
 const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
 
-function freshState(){ return {xp:0, streak:0, lastDay:"", lvl:[1,1,1,1], seen:new Set(), bilanDone:false}; }
+function freshState(){ return {xp:0, streak:0, lastDay:"", lvl:DOMAINS.map(()=>1), seen:new Set(), bilanDone:false}; }
 
 /* --- code de sauvegarde --- */
 function encodeState(){
@@ -509,7 +640,9 @@ function decodeState(code){
     while(b64.length%4) b64+="=";
     const obj=JSON.parse(decodeURIComponent(escape(atob(b64))));
     if(obj.v!==1||!Array.isArray(obj.l)) return null;
-    return {xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:obj.l.map(n=>Math.min(3,Math.max(1,n|0))), seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b};
+    const lvl=obj.l.map(n=>Math.min(3,Math.max(1,n|0)));
+    while(lvl.length<DOMAINS.length) lvl.push(1); /* anciens codes à 4 domaines : les nouveaux démarrent niv. 1 */
+    return {xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:lvl.slice(0,DOMAINS.length), seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b};
   }catch(e){ return null; }
 }
 
@@ -538,11 +671,12 @@ function poolFor(d, lvl){
 }
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function buildSession(){
-  const order=[0,1,2,3].sort(()=>Math.random()-0.5);
+  const all=DOMAINS.map((_,i)=>i);
+  const order=all.slice().sort(()=>Math.random()-0.5).slice(0,4);
   const qs=[];
   order.forEach(d=>{ const o=pick(poolFor(d,S.lvl[d])); qs.push(o); });
   // 5e question : domaine au niveau le plus bas (renforcement)
-  const weakest=[0,1,2,3].reduce((a,b)=>S.lvl[a]<=S.lvl[b]?a:b);
+  const weakest=all.reduce((a,b)=>S.lvl[a]<=S.lvl[b]?a:b);
   let extra=pick(poolFor(weakest,S.lvl[weakest]));
   let guard=0;
   while(qs.some(o=>o.i===extra.i)&&guard++<20) extra=pick(poolFor(weakest,S.lvl[weakest]));
@@ -554,7 +688,7 @@ function buildSession(){
 let session=null; // {qs, idx, correct, xpGain, combo, isBilan, results:[], streakByDom:{}}
 function startSession(isBilan){
   const qs = isBilan ? BILAN_IDS.map(i=>({q:BANK[i], i})) : buildSession();
-  session={qs, idx:0, correct:0, xpGain:0, combo:0, isBilan, results:[], perDom:[[0,0],[0,0],[0,0],[0,0]]};
+  session={qs, idx:0, correct:0, xpGain:0, combo:0, isBilan, results:[], perDom:DOMAINS.map(()=>[0,0])};
   show("scr-quiz");
   renderQuestion();
 }
@@ -614,7 +748,7 @@ function nextQ(){
 /* --- fin de session normale --- */
 function adjustLevels(){
   const ups=[];
-  for(let d=0; d<4; d++){
+  for(let d=0; d<DOMAINS.length; d++){
     const [ok,tot]=session.perDom[d];
     if(!tot) continue;
     if(ok===tot && S.lvl[d]<3){ S.lvl[d]++; ups.push(`${DOMAINS[d].emoji} <b>${DOMAINS[d].short}</b> passe au niveau ${S.lvl[d]} !`); }
@@ -689,6 +823,79 @@ function renderHome(){
   show("scr-home");
 }
 
+/* ============ LE FLUX ============ */
+let fluxState=null; // {count, xp, q:[shuffled quiz ids], qi}
+function fluxShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function openFlux(){
+  fluxState={count:0, xp:0, qpool:fluxShuffle(BANK.map((_,i)=>i)), qi:0, factPool:fluxShuffle(FACTS.map((_,i)=>i)), fi:0, quotePool:fluxShuffle(QUOTES.map((_,i)=>i)), ki:0};
+  $("fluxxp").textContent="0";
+  $("fluxscroll").innerHTML="";
+  addFluxCards(6);
+  const sc=$("fluxscroll");
+  sc.onscroll=()=>{ if(sc.scrollTop+sc.clientHeight > sc.scrollHeight-800) addFluxCards(4); };
+  show("scr-flux");
+  sc.scrollTop=0;
+}
+function nextFrom(pool, idxKey, srcLen){ // rotation infinie avec re-mélange
+  if(fluxState[idxKey]>=pool.length){ fluxState[idxKey]=0; }
+  return pool[fluxState[idxKey]++ % pool.length];
+}
+function addFluxCards(n){
+  const sc=$("fluxscroll");
+  let html="";
+  for(let k=0;k<n;k++){
+    const pos=fluxState.count++;
+    // motif : quiz toutes les 3 cartes, sinon alternance fait / citation
+    const kind = (pos%3===2) ? "quiz" : (pos%3===0 ? "fact" : (Math.random()<0.72?"fact":"quote"));
+    if(kind==="quiz"){
+      const qid=fluxState.qpool[fluxState.qi++ % fluxState.qpool.length];
+      if(fluxState.qi>=fluxState.qpool.length){ fluxState.qpool=fluxShuffle(fluxState.qpool); fluxState.qi=0; }
+      html+=fluxQuizCard(qid);
+    } else if(kind==="quote"){
+      const kid=fluxState.quotePool[fluxState.ki++ % fluxState.quotePool.length];
+      if(fluxState.ki>=fluxState.quotePool.length){ fluxState.quotePool=fluxShuffle(fluxState.quotePool); fluxState.ki=0; }
+      const q=QUOTES[kid];
+      html+=`<div class="fcard quote"><span class="fchip">❝</span><div class="fbody">${q.q}</div><div class="fauthor">— ${q.a}</div></div>`;
+    } else {
+      const fid=fluxState.factPool[fluxState.fi++ % fluxState.factPool.length];
+      if(fluxState.fi>=fluxState.factPool.length){ fluxState.factPool=fluxShuffle(fluxState.factPool); fluxState.fi=0; }
+      const f=FACTS[fid];
+      html+=`<div class="fcard"><span class="fchip">${f.c}</span><span class="ftag" style="background:#3987e526; color:#3987e5;">Le saviez-vous</span><div class="fbody">${f.x}</div>${f.s?`<div class="fsrc">${f.s}</div>`:""}</div>`;
+    }
+  }
+  sc.insertAdjacentHTML("beforeend", html);
+  bindFluxQuiz();
+}
+function fluxQuizCard(qid){
+  const q=BANK[qid], dom=DOMAINS[q.d];
+  const perm=fluxShuffle(q.c.map((_,i)=>i));
+  const choices=perm.map(ci=>`<button class="fchoice" data-q="${qid}" data-ci="${ci}">${q.c[ci]}</button>`).join("");
+  return `<div class="fcard fquiz" data-card="${qid}"><span class="ftag" style="background:${dom.color}26; color:${dom.color};">${dom.emoji} ${dom.short}</span><div class="fq">${q.q}</div><div class="fchoicewrap">${choices}</div><div class="fexplwrap"></div></div>`;
+}
+function bindFluxQuiz(){
+  document.querySelectorAll(".fchoice:not([data-bound])").forEach(btn=>{
+    btn.setAttribute("data-bound","1");
+    btn.addEventListener("click",()=>{
+      const qid=+btn.dataset.q, ci=+btn.dataset.ci, q=BANK[qid];
+      const card=btn.closest(".fcard");
+      if(card.dataset.answered) return;
+      card.dataset.answered="1";
+      const ok=ci===q.a;
+      card.querySelectorAll(".fchoice").forEach(b=>{
+        b.disabled=true;
+        const bci=+b.dataset.ci;
+        if(bci===q.a) b.classList.add("correct");
+        else if(bci===ci) b.classList.add("wrong");
+        else b.classList.add("dim");
+      });
+      if(ok){ fluxState.xp+=5; S.xp+=5; $("fluxxp").textContent=fluxState.xp; autoSave(); }
+      const v = ok?`<div style="color:var(--good);font-weight:700;margin-bottom:4px;">✓ +5 XP</div>`:`<div style="color:var(--bad);font-weight:700;margin-bottom:4px;">✗ ${q.c[q.a]}</div>`;
+      card.querySelector(".fexplwrap").innerHTML=`<div class="fexpl">${v}${q.e}</div>`;
+    });
+  });
+}
+function closeFlux(){ $("fluxscroll").onscroll=null; renderHome(); }
+
 /* ============ NAVIGATION ============ */
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
 function copyText(txt, btn){
@@ -703,6 +910,8 @@ function init(){
   S=freshState();
   $("btn-bilan").addEventListener("click",()=>startSession(true));
   $("btn-start").addEventListener("click",()=>startSession(false));
+  $("btn-flux").addEventListener("click",openFlux);
+  $("btn-fluxquit").addEventListener("click",closeFlux);
   $("btn-again").addEventListener("click",()=>startSession(false));
   $("btn-next").addEventListener("click",nextQ);
   $("btn-quit").addEventListener("click",()=>{ if(confirm("Quitter la session en cours ?")) renderHome(); });

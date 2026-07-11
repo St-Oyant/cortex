@@ -1,7 +1,7 @@
-/* Cortex service worker — v1.3
+/* Cortex service worker — v2.0
    Stratégie : network-first pour la page (toujours la version la plus fraîche
    quand on est en ligne), cache en secours (l'app marche hors-ligne). */
-const CACHE = "cortex-v1.3";
+const CACHE = "cortex-v2.0";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-maskable-512.png"];
 
 self.addEventListener("install", e => {
