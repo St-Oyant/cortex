@@ -60,7 +60,7 @@
   .dombar > div{height:100%; border-radius:3px; transition:width .5s ease;}
   .domlvl{font-size:12px; color:var(--muted); width:52px; text-align:right;}
 
-  button{font-family:inherit; border:none; cursor:pointer;}
+  button{font-family:inherit; color:inherit; border:none; cursor:pointer;}
   .btn{
     width:100%; padding:16px; border-radius:var(--radius);
     font-size:17px; font-weight:600; color:#fff;
@@ -126,19 +126,46 @@
   .footerlinks{display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; margin-top:16px;}
   .tappable{cursor:pointer;}
   .tappable:active{transform:scale(.985);}
-  .backbtn{background:var(--surface); border:1px solid var(--hairline); color:var(--ink); width:38px; height:38px; border-radius:12px; font-size:18px; flex:none;}
+  .backbtn{background:var(--surface); border:1px solid var(--hairline); color:var(--ink); width:38px; height:38px; border-radius:12px; font-size:20px; line-height:1; flex:none; display:inline-flex; align-items:center; justify-content:center; padding:0;}
   #scr-stats .topbar, #scr-streak .topbar, #scr-domain .topbar{justify-content:flex-start; gap:14px;}
 
-  /* badges domaines */
-  .domgrid{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
-  .dombadge{background:var(--surface2); border:1px solid var(--hairline); border-radius:14px; padding:11px 12px; text-align:left; color:var(--ink); display:flex; flex-direction:column; gap:6px;}
-  .dombadge:active{transform:scale(.97);}
-  .dombadge .brow{display:flex; align-items:center; gap:7px;}
-  .dombadge .bemoji{font-size:18px;}
-  .dombadge .bname{font-size:12.5px; font-weight:600; color:var(--ink2); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-  .dombadge .bdots{font-size:10px; letter-spacing:3px;}
-  .dombadge .bbar{height:4px; border-radius:2px; background:var(--surface); overflow:hidden;}
-  .dombadge .bbar>div{height:100%; border-radius:2px;}
+  /* en-tête de carte cliquable */
+  .cardhead{display:flex; align-items:center; justify-content:space-between;}
+  .cardhead h3{text-transform:uppercase; letter-spacing:.08em; color:var(--muted); font-weight:600; font-size:13px;}
+  .chev{color:var(--muted); font-size:22px; line-height:1;}
+
+  /* domaines compacts : mini barres verticales (une par domaine) */
+  .dombars{display:flex; align-items:flex-end; justify-content:space-between; gap:6px; margin-top:12px; height:64px;}
+  .dombarcol{flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; height:100%; justify-content:flex-end;}
+  .dombarcol .track{width:100%; max-width:26px; flex:1; background:var(--surface2); border-radius:5px; display:flex; align-items:flex-end; overflow:hidden;}
+  .dombarcol .fillv{width:100%; border-radius:5px; transition:height .4s ease;}
+  .dombarcol .bemoji{font-size:15px;}
+
+  /* badges (écran domaines détaillé) */
+  .domrows{display:flex; flex-direction:column; gap:8px;}
+  .domitem{background:var(--surface2); border:1px solid var(--hairline); border-radius:13px; padding:11px 13px; text-align:left; color:var(--ink); display:flex; align-items:center; gap:11px;}
+  .domitem:active{transform:scale(.98);}
+  .domitem .bemoji{font-size:20px; flex:none;}
+  .domitem .bname{font-size:14px; font-weight:600; flex:1;}
+  .domitem .bbar{flex:1.1; height:6px; border-radius:3px; background:var(--surface); overflow:hidden;}
+  .domitem .bbar>div{height:100%; border-radius:3px;}
+  .domitem .blvl{font-size:12px; color:var(--muted); width:44px; text-align:right;}
+  .domitem .chev{font-size:20px;}
+
+  /* toggle de granularité */
+  .granrow{display:flex; gap:6px; margin-bottom:12px;}
+  .granbtn{flex:1; padding:8px 0; border-radius:10px; background:var(--surface2); border:1px solid var(--hairline); color:var(--ink2); font-size:13px; font-weight:600;}
+  .granbtn.on{background:#3987e5; border-color:#3987e5; color:#fff;}
+  .chartwrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  .leg{display:flex; flex-wrap:wrap; gap:8px 12px; margin-top:12px;}
+  .leg span{display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--ink2);}
+  .leg i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+
+  /* tuiles de stats (Aujourd'hui) */
+  .tiles{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .tile{background:var(--surface2); border:1px solid var(--hairline); border-radius:14px; padding:14px;}
+  .tile .tval{font-size:26px; font-weight:800; letter-spacing:-.5px;}
+  .tile .tlab{font-size:12.5px; color:var(--muted); margin-top:2px;}
 
   /* jours (série) */
   .daysdots{display:flex; gap:6px; flex-wrap:wrap;}
@@ -160,36 +187,36 @@
   #scr-flux.active{display:flex; position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:100dvh; overflow:hidden; background:var(--page); z-index:20;}
   .fluxbar{display:flex; align-items:center; gap:12px; padding:14px 18px 10px; flex:none; background:var(--page); z-index:5;}
   .fluxbar .fluxtitle{font-size:17px; font-weight:700; flex:1;}
-  #fluxscroll{flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; padding:0 14px 40px;}
-  /* pile de cartes : chaque slot est un cran de scroll (snap strict, une carte
-     à la fois), la carte sticky → la suivante monte et recouvre la précédente */
-  .fslot{height:82vh; scroll-snap-align:center; scroll-snap-stop:always; position:relative; padding-top:6px;}
+  #fluxscroll{flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; padding:0 14px;}
+  /* une seule carte visible à la fois : le slot fait toute la hauteur utile,
+     la carte le remplit — aucun bord de la carte voisine ne dépasse */
+  .fslot{height:100%; scroll-snap-align:start; scroll-snap-stop:always; padding:6px 0 10px; box-sizing:border-box;}
   .fcard{
-    position:sticky; top:6px; min-height:70vh; max-height:74vh;
-    display:flex; flex-direction:column; justify-content:center;
+    height:100%;
+    display:flex; flex-direction:column;
     background:var(--surface); border:1px solid var(--hairline); border-radius:20px;
-    padding:0; overflow:hidden;
-    box-shadow:0 -10px 34px rgba(0,0,0,.55);
-    animation:fadein .3s ease;
+    padding:0; overflow:hidden; position:relative;
+    animation:fadein .28s ease;
   }
   .fcard.fquiz{background:linear-gradient(180deg, var(--surface) 0%, #1e1e28 100%);}
-  .fcard .accent{height:3px; width:100%; flex:none;}
+  .fcard .accent{height:4px; width:100%; flex:none;}          /* ligne en HAUT pour toutes les cartes */
   /* panneaux avant / détail (swipe gauche ou bouton) */
-  .fpanes{display:flex; width:200%; flex:1; transition:transform .32s cubic-bezier(.2,.8,.25,1);}
+  .fpanes{display:flex; width:200%; flex:1; min-height:0; transition:transform .32s cubic-bezier(.2,.8,.25,1);}
   .fcard.flipped .fpanes{transform:translateX(-50%);}
-  .fpane{width:50%; flex:none; display:flex; flex-direction:column; justify-content:center; padding:22px 20px; overflow-y:auto;}
+  .fpane{width:50%; flex:none; display:flex; flex-direction:column; justify-content:flex-start; padding:22px 20px; overflow-y:auto;} /* contenu depuis le HAUT */
   .fmore{align-self:flex-start; margin-top:18px; background:var(--surface2); border:1px solid var(--hairline); color:var(--ink2); font-size:13.5px; font-weight:600; padding:9px 14px; border-radius:999px;}
   .fback{align-self:flex-start; margin-bottom:14px; background:var(--surface2); border:1px solid var(--hairline); color:var(--ink2); font-size:13.5px; font-weight:600; padding:8px 13px; border-radius:999px;}
   .fdetail{font-size:16px; line-height:1.6; color:var(--ink2);}
   .fdetail b{color:var(--ink);}
-  .fcard .ftag{align-self:flex-start; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:5px 11px; border-radius:999px; margin-bottom:16px;}
+  .fsrclink{display:inline-flex; align-items:center; gap:6px; margin-top:20px; font-size:14px; color:#3987e5; font-weight:600; text-decoration:none; border:1px solid #3987e540; background:#3987e514; padding:9px 14px; border-radius:999px; align-self:flex-start;}
+  .fcard .ftag{align-self:flex-start; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:5px 11px; border-radius:999px; margin-bottom:16px; display:inline-flex; align-items:center; gap:6px;}
   .fcard .fbody{font-size:22px; line-height:1.5; font-weight:600;}
   .fcard .fbody b{color:#fff;}
   .fcard .fsrc{font-size:13px; color:var(--muted); margin-top:16px;}
-  .fcard.quote .fbody{font-size:24px; font-style:italic; font-weight:600; line-height:1.55;}
+  .fcard.quote .fbody{font-size:23px; font-style:italic; font-weight:600; line-height:1.55;}
   .fcard.quote .fauthor{font-size:15px; color:var(--ink2); margin-top:16px; font-weight:600;}
   .fquizpane{width:100%;}
-  .fquiz .fq{font-size:21px; line-height:1.45; font-weight:600; margin-bottom:18px;}
+  .fquiz .fq{font-size:20px; line-height:1.45; font-weight:600; margin-bottom:18px;}
   .fchoicewrap{width:100%;}
   .fchoice{width:100%; text-align:left; padding:13px 15px; margin-bottom:9px; background:var(--surface); border:1px solid var(--hairline); border-radius:13px; color:var(--ink); font-size:16px; line-height:1.3;}
   .fchoice:active{border-color:var(--muted);}
@@ -199,8 +226,7 @@
   .fchoice:disabled{cursor:default;}
   .fexpl{background:var(--surface2); border-radius:12px; padding:12px 14px; font-size:14px; line-height:1.5; color:var(--ink2); margin-top:6px; animation:fadein .3s ease;}
   .fexpl b{color:#fff;}
-  .fhint{text-align:center; color:var(--muted); font-size:13px; padding:10px 0 4px; animation:fadein .4s;}
-  .fchip{align-self:flex-start; font-size:34px; margin-bottom:6px;}
+  .fchip{align-self:flex-start; font-size:34px; margin-bottom:10px;}
   .footerlinks button{background:none; color:var(--muted); font-size:13px; text-decoration:underline; text-underline-offset:3px;}
 
   /* bilan résultat : barres par domaine */
@@ -219,21 +245,20 @@
     </div>
 
     <button class="card tappable" id="xpcard" style="width:100%; text-align:left;">
-      <div class="xprow"><span class="lvl" id="rankname">Curieux</span><span class="xpnum" id="xpnum">0 XP</span></div>
+      <div class="xprow"><span class="lvl" id="rankname">🌱 Curieux</span><span class="xpnum" id="xpnum">0 XP</span></div>
       <div class="xpbar"><div id="xpfill" style="width:0%"></div></div>
       <div class="note" id="xpnext"></div>
-      <div class="note" style="margin-top:6px; opacity:.7;">Toucher pour voir ta progression →</div>
     </button>
 
-    <div class="card">
-      <h3>Tes domaines</h3>
-      <div class="domgrid" id="domlist"></div>
-    </div>
+    <button class="card tappable" id="domcard" style="width:100%; text-align:left;">
+      <div class="cardhead"><h3 style="margin:0;">Tes domaines</h3><span class="chev">›</span></div>
+      <div class="dombars" id="domlist"></div>
+    </button>
 
-    <div class="card" id="dailycard">
-      <h3>Aujourd'hui</h3>
-      <div class="sub" id="dailymsg"></div>
-    </div>
+    <button class="card tappable" id="dailycard" style="width:100%; text-align:left;">
+      <div class="cardhead"><h3 style="margin:0;">Aujourd'hui</h3><span class="chev">›</span></div>
+      <div class="sub" id="dailymsg" style="margin-top:10px;"></div>
+    </button>
 
     <button class="btn" id="btn-start">⚡ Session éclair · 5 questions</button>
     <button class="btn secondary" id="btn-flux" style="margin-top:10px;">🌊 Le Flux · picore sans fin</button>
@@ -282,13 +307,30 @@
       <div class="sub">jours d'affilée · record : <b id="stk-best">0</b></div>
     </div>
     <div class="card">
-      <h3>🛡️ Boucliers de série</h3>
-      <div style="font-size:30px; letter-spacing:6px; margin-bottom:8px;" id="stk-shields"></div>
-      <p class="sub">Tu gagnes un bouclier <b>tous les 7 jours de série</b> (2 en stock max). Si tu sautes un jour, un bouclier se consume automatiquement et ta série survit. S'il n'y en a plus… tout repart de zéro 😬</p>
+      <h3>Derniers jours</h3>
+      <div class="daysdots" id="stk-days"></div>
+      <div class="note" id="stk-daysnote" style="margin-top:10px;"></div>
     </div>
     <div class="card">
-      <h3>14 derniers jours</h3>
-      <div class="daysdots" id="stk-days"></div>
+      <h3>🛡️ Boucliers de série</h3>
+      <div style="font-size:30px; letter-spacing:8px; margin-bottom:8px;" id="stk-shields"></div>
+      <div class="note" id="stk-progress" style="margin-bottom:8px;"></div>
+      <p class="sub">Un bouclier s'obtient après <b>7 jours propres consécutifs</b> (2 en stock max). Si tu sautes un jour, un bouclier se consume tout seul et sauve ta série — mais le compteur des 7 jours repart. Sans bouclier, la série retombe à zéro 😬</p>
+    </div>
+  </section>
+
+  <!-- DOMAINES (global) -->
+  <section class="screen" id="scr-domains">
+    <div class="topbar"><button class="backbtn" id="btn-domsback">←</button><h1 style="font-size:22px;">Tes domaines</h1></div>
+    <div class="card">
+      <h3>Évolution par domaine</h3>
+      <div class="granrow" id="domsgran"></div>
+      <div class="chartwrap"><div id="domschart"></div></div>
+      <div class="leg" id="domsleg"></div>
+    </div>
+    <div class="card">
+      <h3>Détail par domaine</h3>
+      <div class="domrows" id="domslist"></div>
     </div>
   </section>
 
@@ -301,6 +343,11 @@
       <div class="xpbar" style="margin-top:12px;"><div id="dom-fill"></div></div>
     </div>
     <div class="card">
+      <h3>Évolution du niveau</h3>
+      <div class="granrow" id="domgran"></div>
+      <div class="chartwrap"><div id="domchart"></div></div>
+    </div>
+    <div class="card">
       <h3>Tes stats</h3>
       <div class="sub" id="dom-stats"></div>
     </div>
@@ -310,10 +357,26 @@
     </div>
   </section>
 
+  <!-- AUJOURD'HUI -->
+  <section class="screen" id="scr-today">
+    <div class="topbar"><button class="backbtn" id="btn-todayback">←</button><h1 style="font-size:22px;">Aujourd'hui</h1></div>
+    <div class="card">
+      <div class="tiles" id="today-tiles"></div>
+    </div>
+    <div class="card">
+      <h3>Évolutions du jour</h3>
+      <div class="sub" id="today-evts"></div>
+    </div>
+    <div class="card">
+      <h3>Sur 7 jours</h3>
+      <div class="sub" id="today-week"></div>
+    </div>
+  </section>
+
   <!-- MISE À NIVEAU -->
   <section class="screen" id="scr-update">
     <h1>Mise à niveau</h1>
-    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v2.1</b> · 212 questions + Le Flux</p>
+    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v2.2</b> · 212 questions + Le Flux</p>
     <div class="card" style="margin-top:18px;">
       <h3>Comment recharger l'app</h3>
       <p class="sub">1️⃣ Copie ton code de progression ci-dessous.<br><br>2️⃣ Envoie-le à Claude avec « <b>Recharge Cortex</b> » : tu recevras un nouvel <b>index.html</b> avec du contenu frais.<br><br>3️⃣ Téléverse-le sur ton dépôt GitHub (Add file → Upload files : il remplace l'ancien). Quelques minutes plus tard, l'app installée se met à jour toute seule — ta progression, elle, reste dans le téléphone.</p>
@@ -423,8 +486,8 @@ const DOMAINS = [
   {name:"Anglais pro", short:"Anglais", color:"#d55181", emoji:"🗣️"},
 ];
 const RANKS = [
-  [0,"Curieux"],[150,"Apprenti"],[400,"Éclairé"],[800,"Analyste"],
-  [1400,"Stratège"],[2200,"Érudit"],[3200,"Polymathe"],[4500,"Maître Cortex"]
+  [0,"Curieux","🌱"],[150,"Apprenti","📖"],[400,"Éclairé","💡"],[800,"Analyste","🧭"],
+  [1400,"Stratège","♟️"],[2200,"Érudit","🎓"],[3200,"Polymathe","🦉"],[4500,"Maître Cortex","👑"]
 ];
 /* Chaque question : d=domaine 0-3, l=difficulté 1-3, q, c=choix, a=index bonne réponse, e=explication */
 const BANK = [
@@ -756,9 +819,13 @@ const QUOTE_MORE=[
   "Will Durant résume ici la pensée d'Aristote sur la vertu : l'excellence n'est pas un exploit isolé mais le fruit d'habitudes répétées. C'est le fondement scientifique de toute app de progression : la régularité crée la compétence.",
   "Pasteur prononça cette phrase en 1854 : les grandes découvertes semblent dues au hasard, mais seul un esprit préparé sait reconnaître et exploiter l'occasion. Se cultiver largement, c'est multiplier ses chances de « voir » ce que d'autres manquent.",
 ];
+/* Article Wikipédia FR le plus pertinent par fait (index aligné sur FACTS) */
+const FACT_WIKI=["Pieuvre","Miel","Lune","Cerveau humain","Requin","Foudre","Fourmi","Arbre","Cléopâtre VII","Architeuthis","Effet Mpemba","Gène","Univers observable","Tortue","Zéro absolu","Guerre anglo-zanzibarite","Chocolat","Antarctique","Dopamine","Abeille","Dorsale médio-océanique","Microbiote","Acide désoxyribonucléique","Os","Soleil","Odorat du chien"];
+/* Page Wikipédia FR de l'auteur par citation (index aligné sur QUOTES) */
+const QUOTE_WIKI=["Sénèque","René Descartes","Édouard Herriot","Isaac Newton","Bernard Werber","Sénèque","Albert Einstein","Connais-toi toi-même","Aristote","Benjamin Franklin","Samuel Johnson","Michel de Montaigne","Léonard de Vinci","Le Petit Prince","Marcel Proust","Confucius","Will Durant","Louis Pasteur"];
 
 /* ============ ÉTAT ============ */
-const APP_VERSION = "2.1";
+const APP_VERSION = "2.2";
 /* PWA : service worker pour l'installation et le mode hors-ligne */
 try {
   if ("serviceWorker" in navigator && location.protocol === "https:") {
@@ -791,24 +858,33 @@ function qlvlOf(lvl){ return lvl<=1 ? 1 : lvl<=3 ? 2 : 3; }
 function freshState(){ return {
   xp:0, streak:0, lastDay:"", lvl:DOMAINS.map(()=>1), seen:new Set(), bilanDone:false,
   sh:0,          /* boucliers de série en stock (max 2) */
-  sm:0,          /* dernier palier de série récompensé */
+  sm:0,          /* (obsolète, conservé pour compat) */
+  cd:0,          /* jours propres consécutifs vers le prochain bouclier */
   bs:0,          /* record de série */
   h:[],          /* historique quotidien [[jour, xpTotal], …] */
   t:DOMAINS.map(()=>[0,0]), /* précision par domaine [bonnes, répondues] */
-  e:[]           /* évolutions de niveau [[domaine, jour, de, vers], …] */
+  e:[],          /* évolutions de niveau [[domaine, jour, de, vers], …] */
+  dd:[]          /* détail quotidien [[jour, sessions, bonnes, fautes, fichesFlux], …] */
 }; }
 function recordHistory(){
   const dn=dayNum(todayStr());
   if(S.h.length && S.h[S.h.length-1][0]===dn) S.h[S.h.length-1][1]=S.xp;
   else S.h.push([dn,S.xp]);
-  if(S.h.length>120) S.h=S.h.slice(-120);
+  if(S.h.length>400) S.h=S.h.slice(-400);
 }
+function todayRec(){
+  const dn=dayNum(todayStr());
+  let r=S.dd.find(x=>x[0]===dn);
+  if(!r){ r=[dn,0,0,0,0]; S.dd.push(r); if(S.dd.length>120) S.dd=S.dd.slice(-120); }
+  return r;
+}
+function addToday(sess,good,bad,flux){ const r=todayRec(); r[1]+=sess; r[2]+=good; r[3]+=bad; r[4]+=flux; }
 
 /* --- code de sauvegarde --- */
 function encodeState(){
   const seenArr=[...S.seen].sort((a,b)=>a-b);
   const obj={v:2,x:S.xp,s:S.streak,d:S.lastDay,l:S.lvl,b:S.bilanDone?1:0,q:seenArr,
-             sh:S.sh,sm:S.sm,bs:S.bs,h:S.h,t:S.t,e:S.e};
+             sh:S.sh,sm:S.sm,cd:S.cd,bs:S.bs,h:S.h,t:S.t,e:S.e,dd:S.dd};
   const json=JSON.stringify(obj);
   return "CTX1-"+btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
@@ -831,10 +907,11 @@ function decodeState(code){
     return Object.assign(base,{
       xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:lvl.slice(0,DOMAINS.length),
       seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b,
-      sh:Math.min(2,obj.sh|0), sm:obj.sm|0, bs:Math.max(obj.bs|0,obj.s|0),
-      h:Array.isArray(obj.h)?obj.h.slice(-120):[],
+      sh:Math.min(2,obj.sh|0), sm:obj.sm|0, cd:obj.cd|0, bs:Math.max(obj.bs|0,obj.s|0),
+      h:Array.isArray(obj.h)?obj.h.slice(-400):[],
       t:(Array.isArray(obj.t)&&obj.t.length?obj.t:base.t).slice(0,DOMAINS.length).concat(DOMAINS.map(()=>[0,0])).slice(0,DOMAINS.length),
-      e:Array.isArray(obj.e)?obj.e.slice(-20):[]
+      e:Array.isArray(obj.e)?obj.e.slice(-60):[],
+      dd:Array.isArray(obj.dd)?obj.dd.slice(-120):[]
     });
   }catch(e){ return null; }
 }
@@ -845,13 +922,13 @@ function touchStreak(){
   if(S.lastDay===t) return null;
   let msg=null;
   const gap = S.lastDay ? dayNum(t)-dayNum(S.lastDay) : 99;
-  if(gap===1){ S.streak+=1; }
-  else if(gap===2 && S.sh>0){ S.sh-=1; S.streak+=1; msg="shield"; } /* le bouclier a sauvé la série ! */
-  else { S.streak=1; }
+  if(gap===1){ S.streak+=1; S.cd+=1; }                                   /* jour propre */
+  else if(gap===2 && S.sh>0){ S.sh-=1; S.streak+=1; S.cd=0; msg="shield"; } /* bouclier consommé : le compteur propre repart */
+  else { S.streak=1; S.cd=1; }                                          /* série perdue */
   S.lastDay=t;
   if(S.streak>S.bs) S.bs=S.streak;
-  /* un bouclier gagné tous les 7 jours de série (stock max 2) */
-  if(S.streak>0 && S.streak%7===0 && S.streak>S.sm){ if(S.sh<2){ S.sh+=1; msg=msg||"earned"; } S.sm=S.streak; }
+  /* bouclier gagné après 7 jours PROPRES consécutifs (non sauvés par un bouclier) */
+  if(S.cd>=7){ S.cd=0; if(S.sh<2){ S.sh+=1; msg=msg||"earned"; } }
   return msg;
 }
 
@@ -966,6 +1043,7 @@ function finishSession(){
   recordHistory();
   const newRank=rankOf(S.xp).cur[1];
   const sc=session.correct, tot=session.qs.length;
+  addToday(1, sc, tot-sc, 0);
   $("res-emoji").textContent = sc===tot?"🏆":sc>=4?"🎯":sc>=3?"👍":sc>=2?"💪":"🌱";
   $("res-score").textContent=`${sc}/${tot}`;
   $("res-xp").textContent=`+${session.xpGain} XP`;
@@ -1011,73 +1089,80 @@ function finishBilan(){
 /* ============ RENDU ACCUEIL ============ */
 function renderHome(){
   const {cur,next}=rankOf(S.xp);
-  $("rankname").textContent=cur[1];
+  $("rankname").textContent=(cur[2]||"")+" "+cur[1];
   $("xpnum").textContent=S.xp+" XP";
   if(next){
     const span=next[0]-cur[0];
     $("xpfill").style.width=Math.round((S.xp-cur[0])/span*100)+"%";
-    $("xpnext").textContent=`Encore ${next[0]-S.xp} XP avant le rang « ${next[1]} »`;
+    $("xpnext").textContent=`Encore ${next[0]-S.xp} XP avant « ${next[2]||""} ${next[1]} »`;
   } else { $("xpfill").style.width="100%"; $("xpnext").textContent="Rang maximum atteint. Chapeau bas."; }
   $("streakval").textContent=S.streak;
   $("shieldmini").textContent = S.sh>0 ? " "+"🛡️".repeat(S.sh) : "";
-  $("domlist").innerHTML=DOMAINS.map((dom,d)=>{
-    const dots=Array.from({length:MAXLVL},(_,i)=>`<span style="color:${i<S.lvl[d]?dom.color:'var(--grid)'}">●</span>`).join("");
-    return `<button class="dombadge" data-d="${d}"><div class="brow"><span class="bemoji">${dom.emoji}</span><span class="bname">${dom.short}</span></div><div class="bdots">${dots}</div><div class="bbar"><div style="width:${S.lvl[d]/MAXLVL*100}%;background:${dom.color}"></div></div></button>`;
-  }).join("");
-  document.querySelectorAll(".dombadge").forEach(b=>b.addEventListener("click",()=>openDomain(+b.dataset.d)));
+  /* domaines compacts : mini barres verticales colorées (hauteur ∝ niveau/5) */
+  $("domlist").innerHTML=DOMAINS.map((dom,d)=>
+    `<div class="dombarcol"><div class="track"><div class="fillv" style="height:${S.lvl[d]/MAXLVL*100}%;background:${dom.color}"></div></div><span class="bemoji">${dom.emoji}</span></div>`
+  ).join("");
   const played = S.lastDay===todayStr();
-  $("dailymsg").innerHTML = played
-    ? "✅ Session du jour faite — ta série est en sécurité. Une de plus ?"
-    : (S.streak>0 ? `⏳ Joue aujourd'hui pour prolonger ta série de <b>${S.streak} jour${S.streak>1?"s":""}</b> !` : "⚡ 5 questions, ~4 minutes. C'est maintenant.");
+  const r=S.dd.find(x=>x[0]===dayNum(todayStr()));
+  const doneToday = r ? `✅ Aujourd'hui : ${r[1]} session${r[1]>1?"s":""}, ${r[2]} bonne${r[2]>1?"s":""} réponse${r[2]>1?"s":""}.` : (S.streak>0?`⏳ Joue aujourd'hui pour prolonger ta série de <b>${S.streak}</b> jour${S.streak>1?"s":""} !`:"⚡ 5 questions, ~4 minutes. C'est le moment.");
+  $("dailymsg").innerHTML=doneToday;
   show("scr-home");
 }
 
 /* ============ LE FLUX ============ */
 let fluxState=null; // {count, xp, q:[shuffled quiz ids], qi}
 function fluxShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+/* accents : couleurs FIXES qui n'imitent aucun domaine (dégradés « marque »),
+   pour ne pas laisser croire que tous les faits sont de la « culture G » */
+const ACCENT_FACT="linear-gradient(90deg,#2a78d6,#4a3aa7)";   /* bleu→violet, marque Cortex */
+const ACCENT_QUOTE="linear-gradient(90deg,#9085e9,#d55181)";  /* violet→magenta */
 function openFlux(){
-  fluxState={count:0, xp:0, qpool:fluxShuffle(BANK.map((_,i)=>i)), qi:0, factPool:fluxShuffle(FACTS.map((_,i)=>i)), fi:0, quotePool:fluxShuffle(QUOTES.map((_,i)=>i)), ki:0};
+  fluxState={count:0, xp:0, seen:0, qpool:fluxShuffle(BANK.map((_,i)=>i)), qi:0, factPool:fluxShuffle(FACTS.map((_,i)=>i)), fi:0, quotePool:fluxShuffle(QUOTES.map((_,i)=>i)), ki:0};
   $("fluxxp").textContent="0";
   $("fluxscroll").innerHTML="";
-  addFluxCards(6);
+  addFluxCards(5);
   const sc=$("fluxscroll");
-  sc.onscroll=()=>{ if(sc.scrollTop+sc.clientHeight > sc.scrollHeight-800) addFluxCards(4); };
+  sc.onscroll=()=>{
+    const idx=Math.round(sc.scrollTop/sc.clientHeight)+1;
+    if(idx>fluxState.seen) fluxState.seen=idx;
+    if(sc.scrollTop+sc.clientHeight > sc.scrollHeight-800) addFluxCards(3);
+  };
   show("scr-flux");
   sc.scrollTop=0;
 }
-function nextFrom(pool, idxKey, srcLen){ // rotation infinie avec re-mélange
-  if(fluxState[idxKey]>=pool.length){ fluxState[idxKey]=0; }
-  return pool[fluxState[idxKey]++ % pool.length];
-}
+function wikiLink(title){ return "https://fr.wikipedia.org/wiki/"+encodeURIComponent(title.replace(/ /g,"_")); }
 function addFluxCards(n){
   const sc=$("fluxscroll");
   let html="";
   for(let k=0;k<n;k++){
     const pos=fluxState.count++;
     const kind = (pos%3===2) ? "quiz" : (pos%3===0 ? "fact" : (Math.random()<0.72?"fact":"quote"));
-    let inner;
+    let inner, cls="";
     if(kind==="quiz"){
       const qid=fluxState.qpool[fluxState.qi++ % fluxState.qpool.length];
       if(fluxState.qi>=fluxState.qpool.length){ fluxState.qpool=fluxShuffle(fluxState.qpool); fluxState.qi=0; }
-      inner=fluxQuizCard(qid);
+      inner=fluxQuizCard(qid); cls="fquiz";
     } else if(kind==="quote"){
       const kid=fluxState.quotePool[fluxState.ki++ % fluxState.quotePool.length];
       if(fluxState.ki>=fluxState.quotePool.length){ fluxState.quotePool=fluxShuffle(fluxState.quotePool); fluxState.ki=0; }
-      const q=QUOTES[kid], more=QUOTE_MORE[kid]||"";
-      inner=`<div class="accent" style="background:#9085e9;"></div><div class="fpanes"><div class="fpane quote">`+
-        `<span class="fchip">❝</span><div class="fbody">${q.q}</div><div class="fauthor">— ${q.a}</div>`+
+      const q=QUOTES[kid], more=QUOTE_MORE[kid]||"", wl=QUOTE_WIKI[kid];
+      cls="quote";
+      inner=`<div class="accent" style="background:${ACCENT_QUOTE};"></div><div class="fpanes"><div class="fpane quote">`+
+        `<span class="ftag" style="background:#9085e926; color:#b3a9f2;">✨ Citation</span><span class="fchip">❝</span><div class="fbody">${q.q}</div><div class="fauthor">— ${q.a}</div>`+
         (more?`<button class="fmore" data-flip>💡 En savoir plus</button>`:"")+
-        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div></div></div>`;
+        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div>`+
+        (wl?`<a class="fsrclink" href="${wikiLink(wl)}" target="_blank" rel="noopener">📖 ${wl} · Wikipédia ↗</a>`:"")+`</div></div>`;
     } else {
       const fid=fluxState.factPool[fluxState.fi++ % fluxState.factPool.length];
       if(fluxState.fi>=fluxState.factPool.length){ fluxState.factPool=fluxShuffle(fluxState.factPool); fluxState.fi=0; }
-      const f=FACTS[fid], more=FACT_MORE[fid]||"";
-      inner=`<div class="accent" style="background:#3987e5;"></div><div class="fpanes"><div class="fpane">`+
-        `<span class="fchip">${f.c}</span><span class="ftag" style="background:#3987e526; color:#3987e5;">Le saviez-vous</span><div class="fbody">${f.x}</div>${f.s?`<div class="fsrc">${f.s}</div>`:""}`+
+      const f=FACTS[fid], more=FACT_MORE[fid]||"", wl=FACT_WIKI[fid];
+      inner=`<div class="accent" style="background:${ACCENT_FACT};"></div><div class="fpanes"><div class="fpane">`+
+        `<span class="ftag" style="background:#3987e526; color:#6fa8ec;">💡 Le saviez-vous</span><span class="fchip">${f.c}</span><div class="fbody">${f.x}</div>${f.s?`<div class="fsrc">${f.s}</div>`:""}`+
         (more?`<button class="fmore" data-flip>💡 En savoir plus</button>`:"")+
-        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div></div></div>`;
+        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div>`+
+        (wl?`<a class="fsrclink" href="${wikiLink(wl)}" target="_blank" rel="noopener">📖 ${wl} · Wikipédia ↗</a>`:"")+`</div></div>`;
     }
-    html+=`<div class="fslot"><div class="fcard ${kind==="quiz"?"fquiz":kind==="quote"?"quote":""}">${inner}</div></div>`;
+    html+=`<div class="fslot"><div class="fcard ${cls}">${inner}</div></div>`;
   }
   sc.insertAdjacentHTML("beforeend", html);
   bindFluxCards();
@@ -1086,7 +1171,8 @@ function fluxQuizCard(qid){
   const q=BANK[qid], dom=DOMAINS[q.d];
   const perm=fluxShuffle(q.c.map((_,i)=>i));
   const choices=perm.map(ci=>`<button class="fchoice" data-q="${qid}" data-ci="${ci}">${q.c[ci]}</button>`).join("");
-  return `<div class="accent" style="background:${dom.color};"></div><div class="fpane fquizpane" style="justify-content:center;"><span class="ftag" style="background:${dom.color}26; color:${dom.color}; align-self:flex-start;">${dom.emoji} ${dom.short} · quiz</span><div class="fq">${q.q}</div><div class="fchoicewrap">${choices}</div><div class="fexplwrap"></div></div>`;
+  /* ligne en HAUT (couleur domaine) + icône quiz, contenu aligné en haut */
+  return `<div class="accent" style="background:${dom.color};"></div><div class="fpane fquizpane"><span class="ftag" style="background:${dom.color}26; color:${dom.color};">📝 Quiz · ${dom.emoji} ${dom.short}</span><div class="fq">${q.q}</div><div class="fchoicewrap">${choices}</div><div class="fexplwrap"></div></div>`;
 }
 function bindFluxCards(){
   document.querySelectorAll(".fchoice:not([data-bound])").forEach(btn=>{
@@ -1105,6 +1191,7 @@ function bindFluxCards(){
         else b.classList.add("dim");
       });
       S.t[q.d][1]++; if(ok) S.t[q.d][0]++;
+      addToday(0, ok?1:0, ok?0:1, 0);
       touchStreak();
       if(ok){ fluxState.xp+=5; S.xp+=5; $("fluxxp").textContent=fluxState.xp; }
       recordHistory();
@@ -1129,7 +1216,7 @@ function bindFluxCards(){
     },{passive:true});
   });
 }
-function closeFlux(){ $("fluxscroll").onscroll=null; renderHome(); }
+function closeFlux(){ if(fluxState){ addToday(0,0,0,fluxState.seen); autoSave(); } $("fluxscroll").onscroll=null; renderHome(); }
 
 /* ============ ÉCRANS PROGRESSION / SÉRIE / DOMAINE ============ */
 function openStats(){
@@ -1168,51 +1255,160 @@ function openStats(){
 function openStreak(){
   $("stk-cur").textContent=S.streak;
   $("stk-best").textContent=S.bs;
-  $("stk-shields").textContent = S.sh>0 ? "🛡️".repeat(S.sh)+"⬜".repeat(2-S.sh) : "⬜⬜";
+  /* boucliers : possédés = plein, à gagner = grisé/estompé (pas une case vide) */
+  $("stk-shields").innerHTML = Array.from({length:2},(_,i)=>
+    i<S.sh ? `<span>🛡️</span>` : `<span style="opacity:.28; filter:grayscale(1);">🛡️</span>`
+  ).join("");
+  $("stk-progress").innerHTML = S.sh>=2
+    ? "Stock de boucliers au maximum 💪"
+    : `Prochain bouclier dans <b>${7-(S.cd%7||0)===7?7:7-(S.cd%7)}</b> jour(s) propres · ${S.cd%7}/7`;
   const dn=dayNum(todayStr());
-  const played=new Set(S.h.map(p=>p[0]));
-  $("stk-days").innerHTML=Array.from({length:14},(_,i)=>{
-    const d=dn-13+i;
+  const played=new Set(S.dd.map(p=>p[0]));
+  const N=28; /* la série n'est pas limitée : on montre 4 semaines glissantes */
+  $("stk-days").innerHTML=Array.from({length:N},(_,i)=>{
+    const d=dn-(N-1)+i;
     return `<span class="daydot ${played.has(d)?"on":""} ${d===dn?"today":""}" title="${dayLabel(d)}"></span>`;
   }).join("");
+  $("stk-daysnote").innerHTML=`Série actuelle : <b>${S.streak}</b> jour${S.streak>1?"s":""} · elle continue tant que tu joues (ou qu'un bouclier te couvre).`;
   show("scr-streak");
 }
+
+/* ---- séries temporelles de niveau par domaine (reconstruites depuis S.e) ---- */
+function domainDaily(d){
+  /* renvoie [[jour, niveau], …] jour par jour sur la période active */
+  const evts=S.e.filter(x=>x[0]===d).sort((a,b)=>a[1]-b[1]);
+  const startDay = S.h.length ? S.h[0][0] : dayNum(todayStr());
+  const endDay = dayNum(todayStr());
+  /* niveau initial = 'de' du 1er évènement, sinon niveau courant */
+  let lvl = evts.length ? evts[0][2] : S.lvl[d];
+  const out=[]; let ei=0;
+  for(let day=startDay; day<=endDay; day++){
+    while(ei<evts.length && evts[ei][1]<=day){ lvl=evts[ei][3]; ei++; }
+    out.push([day,lvl]);
+  }
+  if(!out.length) out.push([endDay,S.lvl[d]]);
+  return out;
+}
+function bucketize(series, gran){
+  /* gran: 'J'=jour, 'S'=semaine(moy), 'M'=mois(moy), 'A'=année(moy) */
+  if(gran==='J') return series.map(p=>[p[0],p[1]]);
+  const size = gran==='S'?7 : gran==='M'?30 : 365;
+  const groups={};
+  series.forEach(([day,v])=>{ const b=Math.floor(day/size); (groups[b]=groups[b]||[]).push(v); });
+  return Object.keys(groups).map(Number).sort((a,b)=>a-b).map(b=>{
+    const arr=groups[b]; return [b*size+Math.floor(size/2), arr.reduce((a,c)=>a+c,0)/arr.length];
+  });
+}
+function multiLineSVG(seriesList, colors, yMin, yMax){
+  const allx=seriesList.flat().map(p=>p[0]);
+  if(!allx.length) return "";
+  const x0=Math.min(...allx), x1=Math.max(...allx);
+  const nPts=Math.max(...seriesList.map(s=>s.length));
+  const W=Math.max(300, nPts*36), H=150, P=14, PB=20;
+  const X=v=>P+(x1===x0?0.5:(v-x0)/(x1-x0))*(W-2*P);
+  const Y=v=>H-PB-((v-yMin)/(yMax-yMin))*(H-P-PB);
+  let grid="";
+  for(let g=yMin; g<=yMax; g++){ const y=Y(g); grid+=`<line x1="${P}" y1="${y}" x2="${W-P}" y2="${y}" stroke="var(--grid)" stroke-width="1"/><text x="2" y="${y+3}" font-size="9" fill="var(--muted)">${g}</text>`; }
+  let lines="";
+  seriesList.forEach((s,i)=>{
+    if(s.length<1) return;
+    const path=s.map((p,j)=>(j?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join(" ");
+    lines+=`<path d="${path}" fill="none" stroke="${colors[i]}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>`;
+    if(s.length===1){ lines+=`<circle cx="${X(s[0][0])}" cy="${Y(s[0][1])}" r="3.5" fill="${colors[i]}"/>`; }
+    const last=s[s.length-1]; lines+=`<circle cx="${X(last[0])}" cy="${Y(last[1])}" r="3" fill="${colors[i]}"/>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" style="height:150px; width:${W}px; max-width:none;">${grid}${lines}</svg>`;
+}
+function renderDomainsChart(gran){
+  document.querySelectorAll("#domsgran .granbtn").forEach(b=>b.classList.toggle("on",b.dataset.g===gran));
+  if(!S.h.length){ $("domschart").innerHTML=""; $("domsleg").innerHTML="<span class='sub'>Joue quelques sessions pour construire l'historique 📈</span>"; return; }
+  const series=DOMAINS.map((_,d)=>bucketize(domainDaily(d),gran));
+  $("domschart").innerHTML=multiLineSVG(series, DOMAINS.map(x=>x.color), 1, MAXLVL);
+  $("domsleg").innerHTML=DOMAINS.map((dom)=>`<span><i style="background:${dom.color}"></i>${dom.short}</span>`).join("");
+}
+function openDomains(){
+  renderDomainsChart(domainsGran);
+  $("domslist").innerHTML=DOMAINS.map((dom,d)=>{
+    const [ok,tot]=S.t[d];
+    return `<button class="domitem" data-d="${d}"><span class="bemoji">${dom.emoji}</span><span class="bname">${dom.short}</span><div class="bbar"><div style="width:${S.lvl[d]/MAXLVL*100}%;background:${dom.color}"></div></div><span class="blvl">${S.lvl[d]}/5</span><span class="chev">›</span></button>`;
+  }).join("");
+  document.querySelectorAll("#domslist .domitem").forEach(b=>b.addEventListener("click",()=>navTo(()=>openDomain(+b.dataset.d))));
+  show("scr-domains");
+}
+let domainsGran='J', domGran='J', domCurrent=0;
+function renderDomainChart(gran){
+  document.querySelectorAll("#domgran .granbtn").forEach(b=>b.classList.toggle("on",b.dataset.g===gran));
+  const dom=DOMAINS[domCurrent];
+  if(!S.h.length){ $("domchart").innerHTML="<span class='sub'>Pas encore d'historique — joue des sessions 📈</span>"; return; }
+  $("domchart").innerHTML=multiLineSVG([bucketize(domainDaily(domCurrent),gran)], [dom.color], 1, MAXLVL);
+}
 function openDomain(d){
+  domCurrent=d; domGran='J';
   const dom=DOMAINS[d];
   $("dom-title").textContent=dom.name;
   $("dom-emoji").textContent=dom.emoji;
   $("dom-lvl").textContent=`niv. ${S.lvl[d]}/${MAXLVL}`;
   const fill=$("dom-fill"); fill.style.width=(S.lvl[d]/MAXLVL*100)+"%"; fill.style.background=dom.color; fill.style.height="100%"; fill.style.borderRadius="4px";
+  renderDomainChart(domGran);
   const seenD=[...S.seen].filter(i=>BANK[i].d===d).length, totD=BANK.filter(q=>q.d===d).length;
   const [ok,tot]=S.t[d];
-  $("dom-stats").innerHTML=`📚 <b>${seenD}</b> questions découvertes sur ${totD}<br>🎯 Précision : <b>${tot?Math.round(ok/tot*100):0}%</b> (${ok}/${tot})<br>⚙️ Difficulté servie actuellement : niveau ${qlvlOf(S.lvl[d])}/3`;
-  const evts=S.e.filter(x=>x[0]===d).slice(-6).reverse();
+  $("dom-stats").innerHTML=`📚 <b>${seenD}</b> questions découvertes sur ${totD}<br>🎯 Précision : <b>${tot?Math.round(ok/tot*100):0}%</b> (${ok}/${tot})<br>⚙️ Difficulté servie : niveau ${qlvlOf(S.lvl[d])}/3`;
+  const evts=S.e.filter(x=>x[0]===d).slice(-8).reverse();
   $("dom-evts").innerHTML = evts.length
     ? evts.map(x=>`${dayLabel(x[1])} : niv. ${x[2]} ${x[3]>x[2]?"→ <b style='color:var(--good)'>"+x[3]+"</b> 📈":"→ <b style='color:var(--bad)'>"+x[3]+"</b> 📉"}`).join("<br>")
-    : "Pas encore d'évolution enregistrée — joue des sessions pour faire bouger ce niveau !";
+    : "Pas encore d'évolution — joue des sessions pour faire bouger ce niveau !";
   show("scr-domain");
 }
-
-/* ============ SWIPE RETOUR GLOBAL ============ */
-const BACK_MAP={"scr-stats":1,"scr-streak":1,"scr-domain":1,"scr-update":1,"scr-save":1,"scr-result":1,"scr-bilan":1,"scr-flux":2,"scr-load":3};
-function goBack(){
-  const cur=document.querySelector(".screen.active"); if(!cur) return;
-  const t=BACK_MAP[cur.id]; if(!t) return;
-  if(t===2) closeFlux();
-  else if(t===3){ S&&S.bilanDone?renderHome():show("scr-welcome"); }
-  else renderHome();
+function openToday(){
+  const dn=dayNum(todayStr());
+  const r=S.dd.find(x=>x[0]===dn)||[dn,0,0,0,0];
+  const good=r[2], bad=r[3], tot=good+bad;
+  $("today-tiles").innerHTML=
+    `<div class="tile"><div class="tval">${r[1]}</div><div class="tlab">session${r[1]>1?"s":""} éclair</div></div>`+
+    `<div class="tile"><div class="tval">${tot}</div><div class="tlab">questions répondues</div></div>`+
+    `<div class="tile"><div class="tval" style="color:var(--good)">${good}</div><div class="tlab">bonnes réponses</div></div>`+
+    `<div class="tile"><div class="tval" style="color:var(--bad)">${bad}</div><div class="tlab">erreurs</div></div>`+
+    `<div class="tile"><div class="tval">${tot?Math.round(good/tot*100):0}%</div><div class="tlab">précision du jour</div></div>`+
+    `<div class="tile"><div class="tval">${r[4]}</div><div class="tlab">fiches du Flux</div></div>`;
+  const evts=S.e.filter(x=>x[1]===dn);
+  $("today-evts").innerHTML = evts.length
+    ? evts.map(x=>`${DOMAINS[x[0]].emoji} <b>${DOMAINS[x[0]].short}</b> : niv. ${x[2]} ${x[3]>x[2]?"→ <b style='color:var(--good)'>"+x[3]+"</b> 📈":"→ <b style='color:var(--bad)'>"+x[3]+"</b> 📉"}`).join("<br>")
+    : "Aucune évolution de niveau aujourd'hui — encore un petit effort ! 💪";
+  /* résumé 7 jours */
+  let s7=0,g7=0,b7=0,f7=0;
+  S.dd.filter(x=>x[0]>dn-7).forEach(x=>{ s7+=x[1]; g7+=x[2]; b7+=x[3]; f7+=x[4]; });
+  $("today-week").innerHTML=`Sur les 7 derniers jours : <b>${s7}</b> session${s7>1?"s":""}, <b>${g7+b7}</b> questions (${(g7+b7)?Math.round(g7/(g7+b7)*100):0}% de réussite), <b>${f7}</b> fiches explorées.`;
+  show("scr-today");
 }
+
+/* ============ NAVIGATION AVEC HISTORIQUE ============ */
+/* Chaque sous-écran empile un état ; le bouton retour d'Android / le geste
+   système déclenchent popstate → on revient dans l'app au lieu de la fermer. */
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
+/* navigue vers un sous-écran : lance l'ouvreur (qui appelle show) puis empile */
+function navTo(opener){ opener(); try{ history.pushState({t:Date.now()},""); }catch(e){} }
+/* recule d'un cran, SANS toucher l'historique (appelé par popstate) */
+function backOne(){
+  const cur=document.querySelector(".screen.active");
+  if(!cur){ renderHome(); return; }
+  if(cur.id==="scr-flux"){ closeFlux(); return; }
+  if(cur.id==="scr-domain"){ openDomains(); return; }             /* domaine → liste domaines */
+  if(cur.id==="scr-load" && !(S&&S.bilanDone)){ show("scr-welcome"); return; }
+  renderHome();
+}
+/* bouton retour dans l'UI : passe par l'historique pour rester synchronisé */
+function uiBack(){ if(history.state&&history.state.t) history.back(); else backOne(); }
+window.addEventListener("popstate",()=>{ backOne(); });
+/* geste : swipe depuis le bord gauche → retour */
 let swipeStart=null;
-document.addEventListener("touchstart",e=>{ const t=e.touches[0]; swipeStart={x:t.clientX,y:t.clientY,edge:t.clientX<34}; },{passive:true});
+document.addEventListener("touchstart",e=>{ const t=e.touches[0]; swipeStart={x:t.clientX,y:t.clientY,edge:t.clientX<32}; },{passive:true});
 document.addEventListener("touchend",e=>{
   if(!swipeStart) return;
   const t=e.changedTouches[0], dx=t.clientX-swipeStart.x, dy=Math.abs(t.clientY-swipeStart.y);
-  if(swipeStart.edge && dx>70 && dy<70) goBack();
+  const onHome=(document.querySelector(".screen.active")||{}).id==="scr-home";
+  if(swipeStart.edge && dx>70 && dy<60 && !onHome) uiBack();
   swipeStart=null;
 },{passive:true});
-
-/* ============ NAVIGATION ============ */
-function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
 function copyText(txt, btn){
   const done=()=>{ const t=btn.textContent; btn.textContent="✓ Copié !"; setTimeout(()=>btn.textContent=t,1600); };
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(()=>fallbackCopy(txt,done)); }
@@ -1225,22 +1421,31 @@ function init(){
   S=freshState();
   $("btn-bilan").addEventListener("click",()=>startSession(true));
   $("btn-start").addEventListener("click",()=>startSession(false));
-  $("btn-flux").addEventListener("click",openFlux);
-  $("btn-fluxquit").addEventListener("click",closeFlux);
-  $("xpcard").addEventListener("click",openStats);
-  $("streakpill").addEventListener("click",openStreak);
-  $("btn-statsback").addEventListener("click",renderHome);
-  $("btn-streakback").addEventListener("click",renderHome);
-  $("btn-domback").addEventListener("click",renderHome);
+  $("btn-flux").addEventListener("click",()=>navTo(openFlux));
+  $("btn-fluxquit").addEventListener("click",uiBack);
+  $("xpcard").addEventListener("click",()=>navTo(openStats));
+  $("streakpill").addEventListener("click",()=>navTo(openStreak));
+  $("domcard").addEventListener("click",()=>navTo(openDomains));
+  $("dailycard").addEventListener("click",()=>navTo(openToday));
+  $("btn-statsback").addEventListener("click",uiBack);
+  $("btn-streakback").addEventListener("click",uiBack);
+  $("btn-domback").addEventListener("click",uiBack);
+  $("btn-domsback").addEventListener("click",uiBack);
+  $("btn-todayback").addEventListener("click",uiBack);
+  /* toggles de granularité */
+  $("domsgran").innerHTML=[["J","Jour"],["S","Sem."],["M","Mois"],["A","Année"]].map(([g,l])=>`<button class="granbtn ${g==='J'?'on':''}" data-g="${g}">${l}</button>`).join("");
+  $("domgran").innerHTML=[["J","Jour"],["S","Sem."],["M","Mois"],["A","Année"]].map(([g,l])=>`<button class="granbtn ${g==='J'?'on':''}" data-g="${g}">${l}</button>`).join("");
+  $("domsgran").addEventListener("click",e=>{ const b=e.target.closest(".granbtn"); if(b){ domainsGran=b.dataset.g; renderDomainsChart(domainsGran); } });
+  $("domgran").addEventListener("click",e=>{ const b=e.target.closest(".granbtn"); if(b){ domGran=b.dataset.g; renderDomainChart(domGran); } });
   $("btn-again").addEventListener("click",()=>startSession(false));
   $("btn-next").addEventListener("click",nextQ);
   $("btn-quit").addEventListener("click",()=>{ if(confirm("Quitter la session en cours ?")) renderHome(); });
   $("btn-home").addEventListener("click",renderHome);
   $("btn-bilan-done").addEventListener("click",renderHome);
   $("btn-rebilan").addEventListener("click",()=>{ if(confirm("Refaire le bilan recalera tes niveaux de départ. OK ?")) startSession(true); });
-  $("btn-load").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; show("scr-load"); });
-  $("btn-load2").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; show("scr-load"); });
-  $("btn-loadback").addEventListener("click",()=>{ S.bilanDone ? renderHome() : show("scr-welcome"); });
+  $("btn-load").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; navTo(()=>show("scr-load")); });
+  $("btn-load2").addEventListener("click",()=>{ $("loadinput").value=""; $("loaderr").style.display="none"; navTo(()=>show("scr-load")); });
+  $("btn-loadback").addEventListener("click",uiBack);
   $("btn-loadgo").addEventListener("click",()=>{
     const st=decodeState($("loadinput").value);
     if(!st){ $("loaderr").style.display="block"; return; }
@@ -1251,14 +1456,14 @@ function init(){
     $("save-note").textContent = CAN_STORE
       ? "✅ Sauvegarde automatique active dans ce navigateur : ta progression est enregistrée toute seule. Ce code n'est qu'une copie de secours (changement de téléphone, etc.)."
       : "⚠️ Ce navigateur ne permet pas la sauvegarde automatique : garde ce code dans tes notes, c'est ta mémoire.";
-    show("scr-save");
+    navTo(()=>show("scr-save"));
   });
-  $("btn-saveback").addEventListener("click",renderHome);
+  $("btn-saveback").addEventListener("click",uiBack);
   $("btn-copy").addEventListener("click",e=>copyText($("res-code").textContent,e.target));
   $("btn-copy2").addEventListener("click",e=>copyText($("save-code").textContent,e.target));
-  $("btn-update").addEventListener("click",()=>{ $("upd-code").textContent=encodeState(); show("scr-update"); });
+  $("btn-update").addEventListener("click",()=>navTo(()=>{ $("upd-code").textContent=encodeState(); show("scr-update"); }));
   $("btn-copy3").addEventListener("click",e=>copyText($("upd-code").textContent,e.target));
-  $("btn-updback").addEventListener("click",renderHome);
+  $("btn-updback").addEventListener("click",uiBack);
   /* Restauration : 1) sauvegarde auto du navigateur, 2) progression préchargée, 3) accueil */
   let restored = null;
   const stored = storeGet();
