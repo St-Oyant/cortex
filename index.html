@@ -124,21 +124,73 @@
   .err{color:var(--bad); font-size:13px; margin-top:8px; display:none;}
 
   .footerlinks{display:flex; flex-wrap:wrap; justify-content:center; gap:10px 16px; margin-top:16px;}
+  .tappable{cursor:pointer;}
+  .tappable:active{transform:scale(.985);}
+  .backbtn{background:var(--surface); border:1px solid var(--hairline); color:var(--ink); width:38px; height:38px; border-radius:12px; font-size:18px; flex:none;}
+  #scr-stats .topbar, #scr-streak .topbar, #scr-domain .topbar{justify-content:flex-start; gap:14px;}
+
+  /* badges domaines */
+  .domgrid{display:grid; grid-template-columns:1fr 1fr; gap:9px;}
+  .dombadge{background:var(--surface2); border:1px solid var(--hairline); border-radius:14px; padding:11px 12px; text-align:left; color:var(--ink); display:flex; flex-direction:column; gap:6px;}
+  .dombadge:active{transform:scale(.97);}
+  .dombadge .brow{display:flex; align-items:center; gap:7px;}
+  .dombadge .bemoji{font-size:18px;}
+  .dombadge .bname{font-size:12.5px; font-weight:600; color:var(--ink2); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .dombadge .bdots{font-size:10px; letter-spacing:3px;}
+  .dombadge .bbar{height:4px; border-radius:2px; background:var(--surface); overflow:hidden;}
+  .dombadge .bbar>div{height:100%; border-radius:2px;}
+
+  /* jours (série) */
+  .daysdots{display:flex; gap:6px; flex-wrap:wrap;}
+  .daydot{width:18px; height:18px; border-radius:6px; background:var(--surface2); border:1px solid var(--hairline);}
+  .daydot.on{background:var(--good); border-color:var(--good);}
+  .daydot.today{outline:2px solid var(--ink2); outline-offset:1px;}
+
+  /* roadmap rangs */
+  .rankrow{display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px solid var(--hairline);}
+  .rankrow:last-child{border-bottom:none;}
+  .rankrow .rname{flex:1; font-size:14.5px; color:var(--ink2);}
+  .rankrow.done .rname{color:var(--muted); text-decoration:line-through;}
+  .rankrow.cur .rname{color:var(--ink); font-weight:700;}
+  .rankrow .rxp{font-size:12px; color:var(--muted);}
+  .rankrow .rmark{width:20px; text-align:center;}
 
   /* ===== LE FLUX ===== */
   #scr-flux{padding:0;}
   #scr-flux.active{display:flex; position:fixed; top:0; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; height:100dvh; overflow:hidden; background:var(--page); z-index:20;}
   .fluxbar{display:flex; align-items:center; gap:12px; padding:14px 18px 10px; flex:none; background:var(--page); z-index:5;}
   .fluxbar .fluxtitle{font-size:17px; font-weight:700; flex:1;}
-  #fluxscroll{flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y proximity; -webkit-overflow-scrolling:touch; padding:0 16px 40px;}
-  .fcard{scroll-snap-align:start; min-height:78vh; display:flex; flex-direction:column; justify-content:center; padding:22px 4px; animation:fadein .3s ease;}
+  #fluxscroll{flex:1 1 auto; min-height:0; overflow-y:auto; scroll-snap-type:y mandatory; -webkit-overflow-scrolling:touch; padding:0 14px 40px;}
+  /* pile de cartes : chaque slot est un cran de scroll (snap strict, une carte
+     à la fois), la carte sticky → la suivante monte et recouvre la précédente */
+  .fslot{height:82vh; scroll-snap-align:center; scroll-snap-stop:always; position:relative; padding-top:6px;}
+  .fcard{
+    position:sticky; top:6px; min-height:70vh; max-height:74vh;
+    display:flex; flex-direction:column; justify-content:center;
+    background:var(--surface); border:1px solid var(--hairline); border-radius:20px;
+    padding:0; overflow:hidden;
+    box-shadow:0 -10px 34px rgba(0,0,0,.55);
+    animation:fadein .3s ease;
+  }
+  .fcard.fquiz{background:linear-gradient(180deg, var(--surface) 0%, #1e1e28 100%);}
+  .fcard .accent{height:3px; width:100%; flex:none;}
+  /* panneaux avant / détail (swipe gauche ou bouton) */
+  .fpanes{display:flex; width:200%; flex:1; transition:transform .32s cubic-bezier(.2,.8,.25,1);}
+  .fcard.flipped .fpanes{transform:translateX(-50%);}
+  .fpane{width:50%; flex:none; display:flex; flex-direction:column; justify-content:center; padding:22px 20px; overflow-y:auto;}
+  .fmore{align-self:flex-start; margin-top:18px; background:var(--surface2); border:1px solid var(--hairline); color:var(--ink2); font-size:13.5px; font-weight:600; padding:9px 14px; border-radius:999px;}
+  .fback{align-self:flex-start; margin-bottom:14px; background:var(--surface2); border:1px solid var(--hairline); color:var(--ink2); font-size:13.5px; font-weight:600; padding:8px 13px; border-radius:999px;}
+  .fdetail{font-size:16px; line-height:1.6; color:var(--ink2);}
+  .fdetail b{color:var(--ink);}
   .fcard .ftag{align-self:flex-start; font-size:12px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:5px 11px; border-radius:999px; margin-bottom:16px;}
   .fcard .fbody{font-size:22px; line-height:1.5; font-weight:600;}
   .fcard .fbody b{color:#fff;}
   .fcard .fsrc{font-size:13px; color:var(--muted); margin-top:16px;}
   .fcard.quote .fbody{font-size:24px; font-style:italic; font-weight:600; line-height:1.55;}
   .fcard.quote .fauthor{font-size:15px; color:var(--ink2); margin-top:16px; font-weight:600;}
+  .fquizpane{width:100%;}
   .fquiz .fq{font-size:21px; line-height:1.45; font-weight:600; margin-bottom:18px;}
+  .fchoicewrap{width:100%;}
   .fchoice{width:100%; text-align:left; padding:13px 15px; margin-bottom:9px; background:var(--surface); border:1px solid var(--hairline); border-radius:13px; color:var(--ink); font-size:16px; line-height:1.3;}
   .fchoice:active{border-color:var(--muted);}
   .fchoice.correct{border-color:var(--good); background:rgba(12,163,12,.10);}
@@ -163,18 +215,19 @@
   <section class="screen" id="scr-home">
     <div class="topbar">
       <div class="brand"><span class="logo">🧠</span><h1>Cortex</h1></div>
-      <div class="pill" id="streakpill">🔥 <b id="streakval">0</b></div>
+      <button class="pill tappable" id="streakpill">🔥 <b id="streakval">0</b><span id="shieldmini"></span></button>
     </div>
 
-    <div class="card">
+    <button class="card tappable" id="xpcard" style="width:100%; text-align:left;">
       <div class="xprow"><span class="lvl" id="rankname">Curieux</span><span class="xpnum" id="xpnum">0 XP</span></div>
       <div class="xpbar"><div id="xpfill" style="width:0%"></div></div>
       <div class="note" id="xpnext"></div>
-    </div>
+      <div class="note" style="margin-top:6px; opacity:.7;">Toucher pour voir ta progression →</div>
+    </button>
 
     <div class="card">
       <h3>Tes domaines</h3>
-      <div id="domlist"></div>
+      <div class="domgrid" id="domlist"></div>
     </div>
 
     <div class="card" id="dailycard">
@@ -202,10 +255,65 @@
     <div id="fluxscroll"></div>
   </section>
 
+  <!-- PROGRESSION -->
+  <section class="screen" id="scr-stats">
+    <div class="topbar"><button class="backbtn" id="btn-statsback">←</button><h1 style="font-size:22px;">Ta progression</h1></div>
+    <div class="card">
+      <h3>Courbe d'XP</h3>
+      <div id="xpchart"></div>
+      <div class="note" id="xpchartnote"></div>
+    </div>
+    <div class="card">
+      <h3>Chemin des rangs</h3>
+      <div id="rankroad"></div>
+    </div>
+    <div class="card">
+      <h3>En chiffres</h3>
+      <div class="sub" id="statsnums"></div>
+    </div>
+  </section>
+
+  <!-- SÉRIE -->
+  <section class="screen" id="scr-streak">
+    <div class="topbar"><button class="backbtn" id="btn-streakback">←</button><h1 style="font-size:22px;">Ta série</h1></div>
+    <div class="card center">
+      <div style="font-size:52px;">🔥</div>
+      <div class="bigscore" style="font-size:40px;" id="stk-cur">0</div>
+      <div class="sub">jours d'affilée · record : <b id="stk-best">0</b></div>
+    </div>
+    <div class="card">
+      <h3>🛡️ Boucliers de série</h3>
+      <div style="font-size:30px; letter-spacing:6px; margin-bottom:8px;" id="stk-shields"></div>
+      <p class="sub">Tu gagnes un bouclier <b>tous les 7 jours de série</b> (2 en stock max). Si tu sautes un jour, un bouclier se consume automatiquement et ta série survit. S'il n'y en a plus… tout repart de zéro 😬</p>
+    </div>
+    <div class="card">
+      <h3>14 derniers jours</h3>
+      <div class="daysdots" id="stk-days"></div>
+    </div>
+  </section>
+
+  <!-- DÉTAIL DOMAINE -->
+  <section class="screen" id="scr-domain">
+    <div class="topbar"><button class="backbtn" id="btn-domback">←</button><h1 style="font-size:22px;" id="dom-title">Domaine</h1></div>
+    <div class="card center">
+      <div style="font-size:46px;" id="dom-emoji"></div>
+      <div class="bigscore" style="font-size:34px;" id="dom-lvl">niv. 1/5</div>
+      <div class="xpbar" style="margin-top:12px;"><div id="dom-fill"></div></div>
+    </div>
+    <div class="card">
+      <h3>Tes stats</h3>
+      <div class="sub" id="dom-stats"></div>
+    </div>
+    <div class="card">
+      <h3>Évolutions récentes</h3>
+      <div class="sub" id="dom-evts"></div>
+    </div>
+  </section>
+
   <!-- MISE À NIVEAU -->
   <section class="screen" id="scr-update">
     <h1>Mise à niveau</h1>
-    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v2.0</b> · 212 questions + Le Flux</p>
+    <p class="sub" style="margin-top:8px;">Version actuelle : <b>Cortex v2.1</b> · 212 questions + Le Flux</p>
     <div class="card" style="margin-top:18px;">
       <h3>Comment recharger l'app</h3>
       <p class="sub">1️⃣ Copie ton code de progression ci-dessous.<br><br>2️⃣ Envoie-le à Claude avec « <b>Recharge Cortex</b> » : tu recevras un nouvel <b>index.html</b> avec du contenu frais.<br><br>3️⃣ Téléverse-le sur ton dépôt GitHub (Add file → Upload files : il remplace l'ancien). Quelques minutes plus tard, l'app installée se met à jour toute seule — ta progression, elle, reste dans le téléphone.</p>
@@ -598,18 +706,69 @@ const QUOTES = [
   {q:"Nous sommes ce que nous faisons de façon répétée. L'excellence n'est donc pas un acte, mais une habitude.",a:"Will Durant (résumant Aristote)"},
   {q:"La chance ne sourit qu'aux esprits bien préparés.",a:"Louis Pasteur"},
 ];
+/* « En savoir plus » : détail attaché à chaque fait (par index) */
+const FACT_MORE=[
+  "Les trois cœurs du poulpe cessent de battre quand il nage, ce qui l'épuise vite — il préfère donc ramper. Son sang est bleu : il transporte l'oxygène avec de l'hémocyanine à base de cuivre, plus efficace que notre fer dans l'eau froide.",
+  "Le miel est hygroscopique (il attire l'eau) et très acide (pH ~3,9). Ces deux propriétés privent les bactéries d'eau libre et d'un milieu viable. Cristallisé, il redevient liquide par un léger chauffage — sans jamais s'abîmer.",
+  "Cet éloignement s'explique par les marées : l'attraction de la Lune déforme les océans, et cette énergie freine très légèrement la rotation terrestre tout en propulsant la Lune plus loin. Nos journées s'allongent ainsi d'environ 1,7 milliseconde par siècle.",
+  "Ce coût énergétique élevé vient du maintien constant des gradients ioniques dans les neurones (la « pile » qui permet les signaux). Même endormi, ton cerveau reste très actif — c'est pendant le sommeil profond qu'il consolide les apprentissages de la journée.",
+  "Les requins n'ont pas d'os mais un squelette de cartilage, plus léger et souple. Certaines espèces doivent nager en permanence pour respirer, d'autres pompent l'eau sur leurs branchies à l'arrêt. Leur odorat détecte une goutte de sang dans un volume gigantesque d'eau.",
+  "Le canal d'air surchauffé par l'éclair se dilate à une vitesse supersonique : c'est cette onde de choc qu'on entend comme le tonnerre. La lumière te parvient quasi instantanément, le son à ~340 m/s — d'où la règle des 3 secondes par kilomètre.",
+  "Ce chiffre colossal s'explique par leur organisation en super-colonies. Certaines espèces pratiquent l'agriculture (elles cultivent des champignons), l'élevage (de pucerons) et la guerre organisée. Rapportée à leur taille, leur force de charge dépasse de loin la nôtre.",
+  "Ce comptage vient d'une vaste étude de 2015 (Nature) combinant images satellites et relevés de terrain. Avant l'agriculture, la Terre comptait environ le double d'arbres. Un arbre mature peut abriter des milliers d'espèces à lui seul.",
+  "Notre intuition écrase les échelles de temps : ~2530 ans séparent la pyramide de Cléopâtre, contre ~2037 ans qui nous séparent d'elle. L'Égypte des pharaons a duré si longtemps que Cléopâtre était déjà, pour son époque, une figure d'histoire ancienne.",
+  "Ces yeux géants captent le moindre photon dans le noir des abysses, notamment la bioluminescence émise par les cachalots qui les chassent. Le calmar géant reste l'un des plus grands animaux jamais filmés vivants dans son milieu, et tardivement (2004).",
+  "L'effet Mpemba dépend de conditions précises (évaporation, convection, gaz dissous, surfusion). Il n'est pas systématique et reste débattu, ce qui en fait un bel exemple de phénomène « évident » en apparence mais rétif à une explication simple.",
+  "Ce pourcentage reflète les gènes de base du métabolisme cellulaire, hérités d'un ancêtre commun à toute la vie. Il ne veut pas dire que tu es « à moitié banane » : la comparaison porte sur des séquences fonctionnelles conservées, pas sur l'apparence.",
+  "Ces ondes s'affaiblissent avec le carré de la distance et se noient vite dans le bruit cosmique : les détecter à des années-lumière serait en pratique quasi impossible. C'est l'une des raisons pour lesquelles chercher des civilisations lointaines est si ardu.",
+  "Ce mécanisme, la respiration cloacale, permet à certaines tortues d'eau douce de rester immergées des semaines en hiver, au ralenti. Leur métabolisme chute drastiquement, réduisant d'autant leurs besoins en oxygène.",
+  "À l'approche du zéro absolu, les atomes perdent presque toute agitation et la matière adopte des états exotiques (condensats de Bose-Einstein). La 3ᵉ loi de la thermodynamique établit qu'on ne peut l'atteindre en un nombre fini d'étapes.",
+  "Le sultan Khalid s'était proclamé successeur sans l'accord britannique. Le bombardement du palais commença à 9h02 ; le drapeau tomba vers 9h40. Environ 500 victimes côté zanzibarite, une poignée de blessés côté britannique.",
+  "Le mot « chocolat » vient du nahuatl. Les Aztèques réservaient le xocolatl (« eau amère ») aux élites et aux guerriers, parfois battu jusqu'à mousser. Le sucre, introduit par les Espagnols, en fit la douceur qu'on connaît.",
+  "Un désert se définit par moins de 250 mm de précipitations par an. L'intérieur de l'Antarctique en reçoit bien moins : c'est un désert polaire. Paradoxalement, ce continent glacé abrite ~70 % de l'eau douce de la planète, sous forme de glace.",
+  "La dopamine n'est pas la molécule du plaisir mais celle de l'anticipation et de la motivation. C'est pourquoi les apps de scroll, qui distillent des récompenses imprévisibles, sont si captivantes — et pourquoi rediriger ce circuit vers une habitude nourrissante fonctionne.",
+  "Dans des expériences, des abeilles ont appris à associer « moins d'éléments » à une récompense, montrant une compréhension du zéro comme quantité — une abstraction que même de jeunes enfants humains mettent du temps à saisir.",
+  "La dorsale médio-océanique est une chaîne volcanique où naissent en permanence de nouveaux fonds marins, dans un lent ballet de tectonique des plaques. La majeure partie de l'activité volcanique terrestre se déroule ainsi, invisible, sous les eaux.",
+  "Ce microbiote, surtout intestinal, participe à la digestion, synthétise des vitamines et éduque le système immunitaire. On parle d'« axe intestin-cerveau » car il influence, via des molécules, l'humeur et certains comportements.",
+  "Chaque cellule contient environ 2 mètres d'ADN compacté dans un noyau microscopique. Multiplié par tes dizaines de milliers de milliards de cellules, le total dépasse l'entendement — un record de compression que l'ingénierie humaine ne sait pas égaler.",
+  "La structure interne de l'os, faite de travées orientées selon les forces qu'il subit, optimise résistance et légèreté. C'est un principe d'ingénierie (l'optimisation topologique) que les concepteurs cherchent aujourd'hui à imiter, notamment en fabrication additive.",
+  "L'énergie produite au cœur du Soleil met des dizaines de milliers d'années à atteindre la surface, tant elle est absorbée et réémise sans cesse par la matière dense. Une fois libérée, elle ne met plus que 8 minutes à franchir les 150 millions de km jusqu'à toi.",
+  "Le museau du chien porte un réseau de crêtes unique, la « truffographie ». Son odorat repose sur ~300 millions de récepteurs (contre ~6 millions chez nous) et une partie du cerveau dédiée à l'odeur proportionnellement bien plus grande.",
+];
+/* « En savoir plus » : contexte attaché à chaque citation (par index) */
+const QUOTE_MORE=[
+  "Sénèque, philosophe stoïcien romain (~4 av. J.-C. – 65 apr. J.-C.), fut le précepteur de Néron. Cette phrase résume une idée stoïcienne : ce sont souvent nos jugements et nos peurs, plus que les obstacles eux-mêmes, qui nous paralysent.",
+  "Le « Cogito ergo sum » de Descartes (1637) est le point de départ de sa philosophie : en doutant de tout, il reste une certitude indubitable — le fait même de penser prouve qu'il existe un « je » qui pense. La fondation du rationalisme moderne.",
+  "Attribuée à Édouard Herriot, homme politique et écrivain français. L'idée : la vraie culture n'est pas l'accumulation de faits, mais ce qui a façonné durablement notre manière de penser et de juger — exactement l'objectif d'un entraînement régulier.",
+  "Newton, l'un des plus grands scientifiques de l'histoire, exprime ici l'humilité de la connaissance : plus on apprend, plus on mesure l'étendue de ce qui reste à découvrir. Un antidote puissant à l'excès de confiance (l'effet Dunning-Kruger).",
+  "Bernard Werber, romancier français (« Les Fourmis »), défend une écriture qui ouvre des questions plutôt que d'imposer des réponses. Une bonne devise pour l'esprit critique : viser la réflexion autonome, pas l'adhésion.",
+  "Encore Sénèque : sans but clair, aucune opportunité ne peut vraiment servir, faute de savoir où la diriger. Une invitation à définir ses objectifs — ce que tu fais précisément en te fixant une routine d'apprentissage.",
+  "Einstein soulignait souvent que l'imagination compte autant que le savoir : la logique déduit à partir de l'existant, l'imagination invente ce qui n'existe pas encore. Les grandes découvertes naissent souvent d'un saut intuitif, validé ensuite par la rigueur.",
+  "Cette maxime gravée au fronton du temple d'Apollon à Delphes fut reprise par Socrate comme fondement de la sagesse : se connaître soi-même, ses limites et ses biais, avant de prétendre connaître le monde.",
+  "Pour Aristote, s'étonner et douter sont le moteur de la philosophie et de la science. Le doute méthodique — remettre en question ses certitudes — est précisément l'outil que l'esprit critique cherche à muscler.",
+  "Franklin, savant et homme d'État américain, était un autodidacte acharné. Sa métaphore financière rappelle que le temps investi à apprendre « rapporte » toute la vie, en ouvrant des portes et en affûtant le jugement.",
+  "Samuel Johnson, homme de lettres anglais du XVIIIᵉ siècle, auteur d'un dictionnaire de référence. Son idée rejoint la science moderne de l'apprentissage : c'est la régularité, plus que l'intensité ponctuelle, qui construit une compétence durable.",
+  "Montaigne, dans ses « Essais » (XVIᵉ siècle), voyait la réflexion comme un apprentissage permanent de la vie et de la finitude. Penser, pour lui, c'est se préparer sereinement à toutes les épreuves de l'existence.",
+  "Souvent attribuée à Léonard de Vinci, cette phrase résume un idéal partagé par les designers et les scientifiques : la vraie maîtrise consiste à rendre simple ce qui est complexe, pas à compliquer ce qui est simple.",
+  "Tirée du « Petit Prince » de Saint-Exupéry (1943), cette réplique du renard invite à regarder au-delà des apparences. Une leçon d'attention et de profondeur, à rebours de la consommation superficielle d'informations.",
+  "Proust, dans « La Prisonnière », suggère que grandir ne consiste pas à accumuler des expériences nouvelles, mais à transformer son regard. Apprendre, au fond, c'est acquérir de nouveaux « yeux » pour relire le monde familier.",
+  "Confucius, penseur chinois (~500 av. J.-C.), valorise l'action patiente et progressive. Tout grand projet — y compris se cultiver — se réalise par petits pas constants, exactement l'esprit d'une série quotidienne.",
+  "Will Durant résume ici la pensée d'Aristote sur la vertu : l'excellence n'est pas un exploit isolé mais le fruit d'habitudes répétées. C'est le fondement scientifique de toute app de progression : la régularité crée la compétence.",
+  "Pasteur prononça cette phrase en 1854 : les grandes découvertes semblent dues au hasard, mais seul un esprit préparé sait reconnaître et exploiter l'occasion. Se cultiver largement, c'est multiplier ses chances de « voir » ce que d'autres manquent.",
+];
 
 /* ============ ÉTAT ============ */
-const APP_VERSION = "2.0";
+const APP_VERSION = "2.1";
 /* PWA : service worker pour l'installation et le mode hors-ligne */
 try {
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(()=>{}));
   }
 } catch(e) {}
-/* Progression préchargée (celle d'Antoine au moment de la mise à niveau).
-   Utilisée uniquement si aucune sauvegarde automatique n'existe encore. */
-const PRELOADED = "CTX1-eyJ2IjoxLCJ4Ijo5NjEsInMiOjEsImQiOiIyMDI2LTA3LTExIiwibCI6WzMsMywzLDNdLCJiIjoxLCJxIjpbMCwxNiwxNywxOCwxOSwyMCwyMiwyMywyNCwyNiwyNywyOCwyOSwzNSwzOSw0Miw0Niw0OSw1NSw1OSw2Miw2Myw2NCw2NSw2Niw2Nyw2OCw2OSw3MCw3Miw4MSw4NCw4OCw5MSw5Miw5Myw5NCw5NSw5Niw5OCwxMDAsMTAxLDEwMywxMDUsMTA2LDEwNywxMDgsMTA5LDExMSwxMTIsMTEzLDExNCwxMTVdfQ";
+/* Progression préchargée : VIDE dans cette version partageable.
+   Chaque nouvel utilisateur démarre à zéro avec son propre bilan.
+   (Pour recharger ta propre progression, colle ton code via « Reprendre un code ».) */
+const PRELOADED = "";
 /* Sauvegarde interne : active dès que le navigateur le permet (fichier ouvert
    dans Chrome/Firefox/Safari). Dans certains aperçus intégrés, le stockage est
    bloqué : on retombe alors sur le code de sauvegarde manuel. */
@@ -619,16 +778,37 @@ try { window.localStorage.setItem("cortex_probe","1"); window.localStorage.remov
 function storeGet(){ try { return window.localStorage.getItem(SKEY); } catch(e){ return null; } }
 function autoSave(){ if(!S) return; try { window.localStorage.setItem(SKEY, encodeState()); } catch(e) {} }
 
-let S = null; // {xp, streak, lastDay, lvl:[4], seen:Set, bilanDone}
+let S = null;
 const $ = id => document.getElementById(id);
 const todayStr = () => { const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); };
+/* jours numérotés depuis le 01/01/2026 (compact pour la sauvegarde) */
+const MAXLVL = 5;
+function dayNum(str){ const p=(str||todayStr()).split("-"); return Math.round((new Date(+p[0],+p[1]-1,+p[2]) - new Date(2026,0,1))/864e5); }
+function dayLabel(dn){ const d=new Date(2026,0,1+dn); return d.getDate()+" "+["janv","févr","mars","avr","mai","juin","juil","août","sept","oct","nov","déc"][d.getMonth()]; }
+/* niveau (1..5) → difficulté des questions servies (1..3) */
+function qlvlOf(lvl){ return lvl<=1 ? 1 : lvl<=3 ? 2 : 3; }
 
-function freshState(){ return {xp:0, streak:0, lastDay:"", lvl:DOMAINS.map(()=>1), seen:new Set(), bilanDone:false}; }
+function freshState(){ return {
+  xp:0, streak:0, lastDay:"", lvl:DOMAINS.map(()=>1), seen:new Set(), bilanDone:false,
+  sh:0,          /* boucliers de série en stock (max 2) */
+  sm:0,          /* dernier palier de série récompensé */
+  bs:0,          /* record de série */
+  h:[],          /* historique quotidien [[jour, xpTotal], …] */
+  t:DOMAINS.map(()=>[0,0]), /* précision par domaine [bonnes, répondues] */
+  e:[]           /* évolutions de niveau [[domaine, jour, de, vers], …] */
+}; }
+function recordHistory(){
+  const dn=dayNum(todayStr());
+  if(S.h.length && S.h[S.h.length-1][0]===dn) S.h[S.h.length-1][1]=S.xp;
+  else S.h.push([dn,S.xp]);
+  if(S.h.length>120) S.h=S.h.slice(-120);
+}
 
 /* --- code de sauvegarde --- */
 function encodeState(){
   const seenArr=[...S.seen].sort((a,b)=>a-b);
-  const obj={v:1,x:S.xp,s:S.streak,d:S.lastDay,l:S.lvl,b:S.bilanDone?1:0,q:seenArr};
+  const obj={v:2,x:S.xp,s:S.streak,d:S.lastDay,l:S.lvl,b:S.bilanDone?1:0,q:seenArr,
+             sh:S.sh,sm:S.sm,bs:S.bs,h:S.h,t:S.t,e:S.e};
   const json=JSON.stringify(obj);
   return "CTX1-"+btoa(unescape(encodeURIComponent(json))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 }
@@ -639,21 +819,40 @@ function decodeState(code){
     let b64=code.slice(5).replace(/-/g,"+").replace(/_/g,"/");
     while(b64.length%4) b64+="=";
     const obj=JSON.parse(decodeURIComponent(escape(atob(b64))));
-    if(obj.v!==1||!Array.isArray(obj.l)) return null;
-    const lvl=obj.l.map(n=>Math.min(3,Math.max(1,n|0)));
-    while(lvl.length<DOMAINS.length) lvl.push(1); /* anciens codes à 4 domaines : les nouveaux démarrent niv. 1 */
-    return {xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:lvl.slice(0,DOMAINS.length), seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b};
+    if((obj.v!==1&&obj.v!==2)||!Array.isArray(obj.l)) return null;
+    let lvl;
+    if(obj.v===1){ /* migration : ancienne échelle /3 → /5 (1→1, 2→3, 3→4) */
+      lvl=obj.l.map(n=>({1:1,2:3,3:4}[Math.min(3,Math.max(1,n|0))]||1));
+    } else {
+      lvl=obj.l.map(n=>Math.min(MAXLVL,Math.max(1,n|0)));
+    }
+    while(lvl.length<DOMAINS.length) lvl.push(1);
+    const base=freshState();
+    return Object.assign(base,{
+      xp:obj.x|0, streak:obj.s|0, lastDay:obj.d||"", lvl:lvl.slice(0,DOMAINS.length),
+      seen:new Set((obj.q||[]).filter(i=>i>=0&&i<BANK.length)), bilanDone:!!obj.b,
+      sh:Math.min(2,obj.sh|0), sm:obj.sm|0, bs:Math.max(obj.bs|0,obj.s|0),
+      h:Array.isArray(obj.h)?obj.h.slice(-120):[],
+      t:(Array.isArray(obj.t)&&obj.t.length?obj.t:base.t).slice(0,DOMAINS.length).concat(DOMAINS.map(()=>[0,0])).slice(0,DOMAINS.length),
+      e:Array.isArray(obj.e)?obj.e.slice(-20):[]
+    });
   }catch(e){ return null; }
 }
 
-/* --- streak --- */
+/* --- série & boucliers --- */
 function touchStreak(){
   const t=todayStr();
-  if(S.lastDay===t) return;
-  const y=new Date(); y.setDate(y.getDate()-1);
-  const yStr=y.getFullYear()+"-"+String(y.getMonth()+1).padStart(2,"0")+"-"+String(y.getDate()).padStart(2,"0");
-  S.streak = (S.lastDay===yStr) ? S.streak+1 : 1;
+  if(S.lastDay===t) return null;
+  let msg=null;
+  const gap = S.lastDay ? dayNum(t)-dayNum(S.lastDay) : 99;
+  if(gap===1){ S.streak+=1; }
+  else if(gap===2 && S.sh>0){ S.sh-=1; S.streak+=1; msg="shield"; } /* le bouclier a sauvé la série ! */
+  else { S.streak=1; }
   S.lastDay=t;
+  if(S.streak>S.bs) S.bs=S.streak;
+  /* un bouclier gagné tous les 7 jours de série (stock max 2) */
+  if(S.streak>0 && S.streak%7===0 && S.streak>S.sm){ if(S.sh<2){ S.sh+=1; msg=msg||"earned"; } S.sm=S.streak; }
+  return msg;
 }
 
 /* --- rangs --- */
@@ -674,12 +873,12 @@ function buildSession(){
   const all=DOMAINS.map((_,i)=>i);
   const order=all.slice().sort(()=>Math.random()-0.5).slice(0,4);
   const qs=[];
-  order.forEach(d=>{ const o=pick(poolFor(d,S.lvl[d])); qs.push(o); });
+  order.forEach(d=>{ const o=pick(poolFor(d,qlvlOf(S.lvl[d]))); qs.push(o); });
   // 5e question : domaine au niveau le plus bas (renforcement)
   const weakest=all.reduce((a,b)=>S.lvl[a]<=S.lvl[b]?a:b);
-  let extra=pick(poolFor(weakest,S.lvl[weakest]));
+  let extra=pick(poolFor(weakest,qlvlOf(S.lvl[weakest])));
   let guard=0;
-  while(qs.some(o=>o.i===extra.i)&&guard++<20) extra=pick(poolFor(weakest,S.lvl[weakest]));
+  while(qs.some(o=>o.i===extra.i)&&guard++<20) extra=pick(poolFor(weakest,qlvlOf(S.lvl[weakest])));
   qs.push(extra);
   return qs.sort(()=>Math.random()-0.5);
 }
@@ -723,6 +922,7 @@ function answer(ci, btn){
   });
   session.results.push(ok);
   S.seen.add(o.i);
+  S.t[q.d][1]++; if(ok) S.t[q.d][0]++;
   autoSave();
   session.perDom[q.d][1]++;
   if(ok){
@@ -747,26 +947,32 @@ function nextQ(){
 
 /* --- fin de session normale --- */
 function adjustLevels(){
-  const ups=[];
+  const ups=[], dn=dayNum(todayStr());
   for(let d=0; d<DOMAINS.length; d++){
     const [ok,tot]=session.perDom[d];
     if(!tot) continue;
-    if(ok===tot && S.lvl[d]<3){ S.lvl[d]++; ups.push(`${DOMAINS[d].emoji} <b>${DOMAINS[d].short}</b> passe au niveau ${S.lvl[d]} !`); }
+    const from=S.lvl[d];
+    if(ok===tot && S.lvl[d]<MAXLVL){ S.lvl[d]++; ups.push(`${DOMAINS[d].emoji} <b>${DOMAINS[d].short}</b> passe au niveau ${S.lvl[d]}/5 !`); }
     else if(ok===0 && tot>=1 && S.lvl[d]>1){ S.lvl[d]--; }
+    if(S.lvl[d]!==from){ S.e.push([d,dn,from,S.lvl[d]]); if(S.e.length>20) S.e=S.e.slice(-20); }
   }
   return ups;
 }
 function finishSession(){
-  touchStreak();
+  const shieldMsg=touchStreak();
   const ups=adjustLevels();
   const oldRank=rankOf(S.xp).cur[1];
   S.xp+=session.xpGain;
+  recordHistory();
   const newRank=rankOf(S.xp).cur[1];
   const sc=session.correct, tot=session.qs.length;
   $("res-emoji").textContent = sc===tot?"🏆":sc>=4?"🎯":sc>=3?"👍":sc>=2?"💪":"🌱";
   $("res-score").textContent=`${sc}/${tot}`;
   $("res-xp").textContent=`+${session.xpGain} XP`;
-  $("res-streak").textContent=`🔥 Série : ${S.streak} jour${S.streak>1?"s":""}${newRank!==oldRank?` · 🎉 Nouveau rang : ${newRank} !`:""}`;
+  let extra = newRank!==oldRank ? ` · 🎉 Nouveau rang : ${newRank} !` : "";
+  if(shieldMsg==="shield") extra += " · 🛡️ Un bouclier a sauvé ta série !";
+  else if(shieldMsg==="earned") extra += " · 🛡️ Bouclier de série gagné !";
+  $("res-streak").textContent=`🔥 Série : ${S.streak} jour${S.streak>1?"s":""}${extra}`;
   const lu=$("res-levelups");
   if(ups.length){ lu.hidden=false; lu.innerHTML=`<h3>Progression</h3><p class="sub">${ups.join("<br>")}</p>`; }
   else lu.hidden=true;
@@ -789,7 +995,7 @@ function finishBilan(){
   let best=-1, bestD=0, worst=4, worstD=0;
   for(let d=0; d<4; d++){
     const [ok,tot]=session.perDom[d];
-    S.lvl[d]= ok<=1 ? 1 : ok===2 ? 2 : 3;
+    S.lvl[d]= ok<=1 ? 1 : ok===2 ? 3 : 4;
     const pct=tot?Math.round(ok/tot*100):0;
     if(ok>best){best=ok;bestD=d;} if(ok<worst){worst=ok;worstD=d;}
     html+=`<div class="domrow"><span class="domdot" style="background:${DOMAINS[d].color}"></span><span class="domname">${DOMAINS[d].short}</span><div class="dombar"><div style="width:${pct}%;background:${DOMAINS[d].color}"></div></div><span class="domlvl">${ok}/${tot}</span></div>`;
@@ -797,6 +1003,7 @@ function finishBilan(){
   $("bilanbars").innerHTML=html;
   $("bilantext").innerHTML=`Ton point fort du jour : <b>${DOMAINS[bestD].name}</b> ${DOMAINS[bestD].emoji}. Ta plus grande marge de progression : <b>${DOMAINS[worstD].name}</b> — les sessions t'en proposeront un peu plus pour muscler ce domaine. La difficulté de chaque domaine est maintenant calée sur ton niveau.`;
   S.xp+=session.xpGain;
+  recordHistory();
   autoSave();
   show("scr-bilan");
 }
@@ -812,10 +1019,12 @@ function renderHome(){
     $("xpnext").textContent=`Encore ${next[0]-S.xp} XP avant le rang « ${next[1]} »`;
   } else { $("xpfill").style.width="100%"; $("xpnext").textContent="Rang maximum atteint. Chapeau bas."; }
   $("streakval").textContent=S.streak;
+  $("shieldmini").textContent = S.sh>0 ? " "+"🛡️".repeat(S.sh) : "";
   $("domlist").innerHTML=DOMAINS.map((dom,d)=>{
-    const pct=Math.round(S.lvl[d]/3*100);
-    return `<div class="domrow"><span class="domdot" style="background:${dom.color}"></span><span class="domname">${dom.emoji} ${dom.short}</span><div class="dombar"><div style="width:${pct}%;background:${dom.color}"></div></div><span class="domlvl">niv. ${S.lvl[d]}/3</span></div>`;
+    const dots=Array.from({length:MAXLVL},(_,i)=>`<span style="color:${i<S.lvl[d]?dom.color:'var(--grid)'}">●</span>`).join("");
+    return `<button class="dombadge" data-d="${d}"><div class="brow"><span class="bemoji">${dom.emoji}</span><span class="bname">${dom.short}</span></div><div class="bdots">${dots}</div><div class="bbar"><div style="width:${S.lvl[d]/MAXLVL*100}%;background:${dom.color}"></div></div></button>`;
   }).join("");
+  document.querySelectorAll(".dombadge").forEach(b=>b.addEventListener("click",()=>openDomain(+b.dataset.d)));
   const played = S.lastDay===todayStr();
   $("dailymsg").innerHTML = played
     ? "✅ Session du jour faite — ta série est en sécurité. Une de plus ?"
@@ -845,34 +1054,41 @@ function addFluxCards(n){
   let html="";
   for(let k=0;k<n;k++){
     const pos=fluxState.count++;
-    // motif : quiz toutes les 3 cartes, sinon alternance fait / citation
     const kind = (pos%3===2) ? "quiz" : (pos%3===0 ? "fact" : (Math.random()<0.72?"fact":"quote"));
+    let inner;
     if(kind==="quiz"){
       const qid=fluxState.qpool[fluxState.qi++ % fluxState.qpool.length];
       if(fluxState.qi>=fluxState.qpool.length){ fluxState.qpool=fluxShuffle(fluxState.qpool); fluxState.qi=0; }
-      html+=fluxQuizCard(qid);
+      inner=fluxQuizCard(qid);
     } else if(kind==="quote"){
       const kid=fluxState.quotePool[fluxState.ki++ % fluxState.quotePool.length];
       if(fluxState.ki>=fluxState.quotePool.length){ fluxState.quotePool=fluxShuffle(fluxState.quotePool); fluxState.ki=0; }
-      const q=QUOTES[kid];
-      html+=`<div class="fcard quote"><span class="fchip">❝</span><div class="fbody">${q.q}</div><div class="fauthor">— ${q.a}</div></div>`;
+      const q=QUOTES[kid], more=QUOTE_MORE[kid]||"";
+      inner=`<div class="accent" style="background:#9085e9;"></div><div class="fpanes"><div class="fpane quote">`+
+        `<span class="fchip">❝</span><div class="fbody">${q.q}</div><div class="fauthor">— ${q.a}</div>`+
+        (more?`<button class="fmore" data-flip>💡 En savoir plus</button>`:"")+
+        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div></div></div>`;
     } else {
       const fid=fluxState.factPool[fluxState.fi++ % fluxState.factPool.length];
       if(fluxState.fi>=fluxState.factPool.length){ fluxState.factPool=fluxShuffle(fluxState.factPool); fluxState.fi=0; }
-      const f=FACTS[fid];
-      html+=`<div class="fcard"><span class="fchip">${f.c}</span><span class="ftag" style="background:#3987e526; color:#3987e5;">Le saviez-vous</span><div class="fbody">${f.x}</div>${f.s?`<div class="fsrc">${f.s}</div>`:""}</div>`;
+      const f=FACTS[fid], more=FACT_MORE[fid]||"";
+      inner=`<div class="accent" style="background:#3987e5;"></div><div class="fpanes"><div class="fpane">`+
+        `<span class="fchip">${f.c}</span><span class="ftag" style="background:#3987e526; color:#3987e5;">Le saviez-vous</span><div class="fbody">${f.x}</div>${f.s?`<div class="fsrc">${f.s}</div>`:""}`+
+        (more?`<button class="fmore" data-flip>💡 En savoir plus</button>`:"")+
+        `</div><div class="fpane"><button class="fback" data-unflip>← Retour</button><div class="fdetail">${more}</div></div></div>`;
     }
+    html+=`<div class="fslot"><div class="fcard ${kind==="quiz"?"fquiz":kind==="quote"?"quote":""}">${inner}</div></div>`;
   }
   sc.insertAdjacentHTML("beforeend", html);
-  bindFluxQuiz();
+  bindFluxCards();
 }
 function fluxQuizCard(qid){
   const q=BANK[qid], dom=DOMAINS[q.d];
   const perm=fluxShuffle(q.c.map((_,i)=>i));
   const choices=perm.map(ci=>`<button class="fchoice" data-q="${qid}" data-ci="${ci}">${q.c[ci]}</button>`).join("");
-  return `<div class="fcard fquiz" data-card="${qid}"><span class="ftag" style="background:${dom.color}26; color:${dom.color};">${dom.emoji} ${dom.short}</span><div class="fq">${q.q}</div><div class="fchoicewrap">${choices}</div><div class="fexplwrap"></div></div>`;
+  return `<div class="accent" style="background:${dom.color};"></div><div class="fpane fquizpane" style="justify-content:center;"><span class="ftag" style="background:${dom.color}26; color:${dom.color}; align-self:flex-start;">${dom.emoji} ${dom.short} · quiz</span><div class="fq">${q.q}</div><div class="fchoicewrap">${choices}</div><div class="fexplwrap"></div></div>`;
 }
-function bindFluxQuiz(){
+function bindFluxCards(){
   document.querySelectorAll(".fchoice:not([data-bound])").forEach(btn=>{
     btn.setAttribute("data-bound","1");
     btn.addEventListener("click",()=>{
@@ -888,13 +1104,112 @@ function bindFluxQuiz(){
         else if(bci===ci) b.classList.add("wrong");
         else b.classList.add("dim");
       });
-      if(ok){ fluxState.xp+=5; S.xp+=5; $("fluxxp").textContent=fluxState.xp; autoSave(); }
+      S.t[q.d][1]++; if(ok) S.t[q.d][0]++;
+      touchStreak();
+      if(ok){ fluxState.xp+=5; S.xp+=5; $("fluxxp").textContent=fluxState.xp; }
+      recordHistory();
+      autoSave();
       const v = ok?`<div style="color:var(--good);font-weight:700;margin-bottom:4px;">✓ +5 XP</div>`:`<div style="color:var(--bad);font-weight:700;margin-bottom:4px;">✗ ${q.c[q.a]}</div>`;
       card.querySelector(".fexplwrap").innerHTML=`<div class="fexpl">${v}${q.e}</div>`;
     });
   });
+  document.querySelectorAll("[data-flip]:not([data-bound])").forEach(b=>{ b.setAttribute("data-bound","1"); b.addEventListener("click",()=>b.closest(".fcard").classList.add("flipped")); });
+  document.querySelectorAll("[data-unflip]:not([data-bound])").forEach(b=>{ b.setAttribute("data-bound","1"); b.addEventListener("click",()=>b.closest(".fcard").classList.remove("flipped")); });
+  /* swipe horizontal sur une carte : gauche = détail, droite = retour */
+  document.querySelectorAll(".fcard:not([data-swipe])").forEach(card=>{
+    card.setAttribute("data-swipe","1");
+    let sx=0,sy=0;
+    card.addEventListener("touchstart",e=>{ const t=e.touches[0]; sx=t.clientX; sy=t.clientY; },{passive:true});
+    card.addEventListener("touchend",e=>{
+      const t=e.changedTouches[0], dx=t.clientX-sx, dy=Math.abs(t.clientY-sy);
+      if(Math.abs(dx)<60||dy>60) return;
+      const hasDetail=card.querySelector("[data-flip]");
+      if(dx<0 && hasDetail) card.classList.add("flipped");
+      else if(dx>0) card.classList.remove("flipped");
+    },{passive:true});
+  });
 }
 function closeFlux(){ $("fluxscroll").onscroll=null; renderHome(); }
+
+/* ============ ÉCRANS PROGRESSION / SÉRIE / DOMAINE ============ */
+function openStats(){
+  /* courbe XP : SVG minimaliste (ligne 2px, grille discrète) */
+  const h=S.h;
+  if(h.length<2){
+    $("xpchart").innerHTML="";
+    $("xpchartnote").textContent = h.length===0 ? "Joue une première session pour démarrer ta courbe." : "Ta courbe apparaîtra dès ton 2ᵉ jour de jeu — reviens demain 😉";
+  } else {
+    const W=320,H=110,P=6;
+    const xs=h.map(p=>p[0]), ys=h.map(p=>p[1]);
+    const x0=Math.min(...xs), x1=Math.max(...xs), y1=Math.max(...ys);
+    const X=v=>P+(x1===x0?0:(v-x0)/(x1-x0))*(W-2*P), Y=v=>H-P-(y1===0?0:v/y1)*(H-2*P);
+    const path=h.map((p,i)=>(i?"L":"M")+X(p[0]).toFixed(1)+" "+Y(p[1]).toFixed(1)).join(" ");
+    const last=h[h.length-1];
+    $("xpchart").innerHTML=`<svg viewBox="0 0 ${W} ${H}" style="width:100%; height:auto;">
+      <line x1="${P}" y1="${H-P}" x2="${W-P}" y2="${H-P}" stroke="var(--grid)" stroke-width="1"/>
+      <path d="${path}" fill="none" stroke="#3987e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="${X(last[0])}" cy="${Y(last[1])}" r="4" fill="#3987e5"/>
+    </svg>`;
+    $("xpchartnote").textContent=`${dayLabel(h[0][0])} → ${dayLabel(last[0])} · ${last[1]} XP au total`;
+  }
+  /* roadmap des rangs */
+  const cur=rankOf(S.xp).cur;
+  $("rankroad").innerHTML=RANKS.map(r=>{
+    const done=S.xp>=r[0] && r[1]!==cur[1];
+    const isCur=r[1]===cur[1];
+    const mark=done?"✅":isCur?"📍":"🔒";
+    return `<div class="rankrow ${done?"done":""} ${isCur?"cur":""}"><span class="rmark">${mark}</span><span class="rname">${r[1]}</span><span class="rxp">${r[0]} XP</span></div>`;
+  }).join("");
+  /* chiffres */
+  const tot=S.t.reduce((a,b)=>a+b[1],0), ok=S.t.reduce((a,b)=>a+b[0],0);
+  $("statsnums").innerHTML=`📚 <b>${S.seen.size}</b> questions découvertes sur ${BANK.length}<br>🎯 Précision globale : <b>${tot?Math.round(ok/tot*100):0}%</b> (${ok}/${tot})<br>🔥 Série record : <b>${S.bs}</b> jour${S.bs>1?"s":""}<br>📅 <b>${S.h.length}</b> jour${S.h.length>1?"s":""} de jeu enregistré${S.h.length>1?"s":""}`;
+  show("scr-stats");
+}
+function openStreak(){
+  $("stk-cur").textContent=S.streak;
+  $("stk-best").textContent=S.bs;
+  $("stk-shields").textContent = S.sh>0 ? "🛡️".repeat(S.sh)+"⬜".repeat(2-S.sh) : "⬜⬜";
+  const dn=dayNum(todayStr());
+  const played=new Set(S.h.map(p=>p[0]));
+  $("stk-days").innerHTML=Array.from({length:14},(_,i)=>{
+    const d=dn-13+i;
+    return `<span class="daydot ${played.has(d)?"on":""} ${d===dn?"today":""}" title="${dayLabel(d)}"></span>`;
+  }).join("");
+  show("scr-streak");
+}
+function openDomain(d){
+  const dom=DOMAINS[d];
+  $("dom-title").textContent=dom.name;
+  $("dom-emoji").textContent=dom.emoji;
+  $("dom-lvl").textContent=`niv. ${S.lvl[d]}/${MAXLVL}`;
+  const fill=$("dom-fill"); fill.style.width=(S.lvl[d]/MAXLVL*100)+"%"; fill.style.background=dom.color; fill.style.height="100%"; fill.style.borderRadius="4px";
+  const seenD=[...S.seen].filter(i=>BANK[i].d===d).length, totD=BANK.filter(q=>q.d===d).length;
+  const [ok,tot]=S.t[d];
+  $("dom-stats").innerHTML=`📚 <b>${seenD}</b> questions découvertes sur ${totD}<br>🎯 Précision : <b>${tot?Math.round(ok/tot*100):0}%</b> (${ok}/${tot})<br>⚙️ Difficulté servie actuellement : niveau ${qlvlOf(S.lvl[d])}/3`;
+  const evts=S.e.filter(x=>x[0]===d).slice(-6).reverse();
+  $("dom-evts").innerHTML = evts.length
+    ? evts.map(x=>`${dayLabel(x[1])} : niv. ${x[2]} ${x[3]>x[2]?"→ <b style='color:var(--good)'>"+x[3]+"</b> 📈":"→ <b style='color:var(--bad)'>"+x[3]+"</b> 📉"}`).join("<br>")
+    : "Pas encore d'évolution enregistrée — joue des sessions pour faire bouger ce niveau !";
+  show("scr-domain");
+}
+
+/* ============ SWIPE RETOUR GLOBAL ============ */
+const BACK_MAP={"scr-stats":1,"scr-streak":1,"scr-domain":1,"scr-update":1,"scr-save":1,"scr-result":1,"scr-bilan":1,"scr-flux":2,"scr-load":3};
+function goBack(){
+  const cur=document.querySelector(".screen.active"); if(!cur) return;
+  const t=BACK_MAP[cur.id]; if(!t) return;
+  if(t===2) closeFlux();
+  else if(t===3){ S&&S.bilanDone?renderHome():show("scr-welcome"); }
+  else renderHome();
+}
+let swipeStart=null;
+document.addEventListener("touchstart",e=>{ const t=e.touches[0]; swipeStart={x:t.clientX,y:t.clientY,edge:t.clientX<34}; },{passive:true});
+document.addEventListener("touchend",e=>{
+  if(!swipeStart) return;
+  const t=e.changedTouches[0], dx=t.clientX-swipeStart.x, dy=Math.abs(t.clientY-swipeStart.y);
+  if(swipeStart.edge && dx>70 && dy<70) goBack();
+  swipeStart=null;
+},{passive:true});
 
 /* ============ NAVIGATION ============ */
 function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active")); $(id).classList.add("active"); window.scrollTo(0,0); }
@@ -912,6 +1227,11 @@ function init(){
   $("btn-start").addEventListener("click",()=>startSession(false));
   $("btn-flux").addEventListener("click",openFlux);
   $("btn-fluxquit").addEventListener("click",closeFlux);
+  $("xpcard").addEventListener("click",openStats);
+  $("streakpill").addEventListener("click",openStreak);
+  $("btn-statsback").addEventListener("click",renderHome);
+  $("btn-streakback").addEventListener("click",renderHome);
+  $("btn-domback").addEventListener("click",renderHome);
   $("btn-again").addEventListener("click",()=>startSession(false));
   $("btn-next").addEventListener("click",nextQ);
   $("btn-quit").addEventListener("click",()=>{ if(confirm("Quitter la session en cours ?")) renderHome(); });
